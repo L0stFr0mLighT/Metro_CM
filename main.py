@@ -1,5 +1,4 @@
 import customtkinter
-
 from estaciones import ESTACIONES, LINEAS
 import mapa
 

@@ -9,6 +9,9 @@ class Grafo:
         for estacion in estaciones:
             for vecino in estacion.vecinos:
                 # TODO: Añadir los costes de los viajes
-                self.grafo.add_edge(vecino[0], estacion)
-                self.grafo.add_edge(vecino[1], estacion)
+                if vecino[0] != None:
+                    self.grafo.add_edge(vecino[0], estacion)
+                if vecino[1] != None:
+                    self.grafo.add_edge(vecino[1], estacion)
+                    
         

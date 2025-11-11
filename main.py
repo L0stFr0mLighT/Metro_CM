@@ -1,7 +1,9 @@
 import customtkinter
-from cairo import ImageSurface, Context, LineCap, FORMAT_ARGB32
-from PIL import Image
-from estaciones import ESTACIONES
+
+from estaciones import ESTACIONES, LINEAS
+import mapa
+
+mapa.dibujar_estaciones(ESTACIONES, LINEAS, 100, 100)
 
 # TODO: Interfaz grafica
 

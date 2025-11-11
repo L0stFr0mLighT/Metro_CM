@@ -1,4 +1,5 @@
 from common.estacion import Estacion, Linea
+
 l_7 = Linea(7)
 l_9 = Linea(9)
 l_1 = Linea(1)
@@ -98,6 +99,13 @@ est_ma_quevedo.add_vecinos(est_viveros, est_copilco, l_3)
 est_copilco.add_vecinos(est_ma_quevedo, est_universidad, l_3)
 est_universidad.add_unico_vecino(est_copilco, l_3)
 
+# Cabeceras
+l_1.set_cabeceras((est_observatorio, est_balderas))
+l_12.set_cabeceras((est_mixcoac, est_eje_central))
+l_3.set_cabeceras((est_universidad, est_juarez))
+l_7.set_cabeceras((est_barranca, est_polanco))
+l_9.set_cabeceras((est_tacubaya, est_lazaro))
+
 ESTACIONES = [ est_polanco, est_auditorio, est_constituyentes, est_tacubaya, 
               est_san_pedro, est_san_antonio, est_mixcoac, est_barranca, est_observatorio, 
               est_juanacatlan, est_chapultepec, est_sevilla, est_insurgentes, est_cuauhtemoc, 
@@ -106,3 +114,5 @@ ESTACIONES = [ est_polanco, est_auditorio, est_constituyentes, est_tacubaya,
               est_juarez, est_ninos_heroes, est_hospital_general, est_etiopia, est_eugenia, 
               est_division, est_coyoacan, est_viveros, est_ma_quevedo, est_copilco, est_universidad
               ]
+
+LINEAS = [l_1, l_12, l_3, l_7, l_9]

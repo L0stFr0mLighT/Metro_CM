@@ -51,7 +51,7 @@ est_patriotismo.set_pos_mapa((float(232 / 536), float(217 / 603)))
 est_chilpancingo = Estacion("Chilpancingo")
 est_chilpancingo.set_pos_mapa((float(322 / 536), float(217 / 603)))
 est_centro_medico = Estacion("Centro Medico")
-est_centro_medico.set_pos_mapa((float(380 / 536), float(217 / 603)))
+est_centro_medico.set_pos_mapa((float(379 / 536), float(217 / 603)))
 est_lazaro = Estacion("Lazaro Cardenas")
 est_lazaro.set_pos_mapa((float(473 / 536), float(217 / 603)))
 

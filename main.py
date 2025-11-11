@@ -2,7 +2,7 @@ import customtkinter
 from estaciones import ESTACIONES, LINEAS
 import mapa
 
-mapa.dibujar_estaciones(ESTACIONES, LINEAS, 100, 100)
+mapa.dibujar_estaciones(ESTACIONES, LINEAS, 500, 500)
 
 # TODO: Interfaz grafica
 

@@ -1,5 +1,13 @@
 from dataclasses import dataclass, field
-from linea import Linea
+
+@dataclass
+class Linea:
+    numero: int
+    cabeceras: tuple['Estacion', 'Estacion'] = field(default_factory=tuple)
+
+    def set_cabeceras(self, cabeceras: tuple['Estacion', 'Estacion']):
+        self.cabeceras = cabeceras
+
 
 @dataclass
 class Estacion:

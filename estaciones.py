@@ -1,6 +1,4 @@
-from common.estacion import Estacion
-from common.linea import Linea
-
+from common.estacion import Estacion, Linea
 l_7 = Linea(7)
 l_9 = Linea(9)
 l_1 = Linea(1)

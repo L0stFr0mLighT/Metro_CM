@@ -46,6 +46,7 @@ def character_limit_min(entry_text):
                             
 ventana = customtkinter.CTk()
 ventana.after(0, lambda: ventana.state("zoomed")) 
+ventana.iconbitmap('Imagenes/Logo_metro.ico')
 ventana.title("Metro Ciudad de Mexico")
 ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_rowconfigure(0, weight=1)

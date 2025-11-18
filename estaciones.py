@@ -56,7 +56,7 @@ l_3 = Linea.crear_linea(3, (est_universidad, est_juarez), (141, 137, 38))
 tacubaya_l7_l1 = Transbordo(est_tacubaya, l_7, l_1, 0)
 tacubaya_l7_l9 = Transbordo(est_tacubaya, l_7, l_9, 0)
 tacubaya_l9_l1 = Transbordo(est_tacubaya, l_9, l_1, 0)
-mixcoac_l7_l12 = Transbordo(est_mixcoac, l_7, l_9, 0)
+mixcoac_l7_l12 = Transbordo(est_mixcoac, l_7, l_12, 0)
 balderas_l3_l1 = Transbordo(est_balderas, l_3, l_1, 0)
 centro_medico_l9_l3 = Transbordo(est_centro_medico, l_9, l_3, 0)
 zapata_l12_l3 = Transbordo(est_zapata, l_12, l_3, 0)
@@ -126,8 +126,10 @@ hospital_general_centro_medico = Conexion(est_hospital_general, est_centro_medic
 centro_medico_hospital_general = hospital_general_centro_medico.simetrico()
 centro_medico_etiopia = Conexion(est_centro_medico, est_etiopia, l_3, 0)
 etiopia_centro_medico = centro_medico_etiopia.simetrico()
-etiopia_division = Conexion(est_etiopia, est_division, l_3, 0)
-division_etiopia = etiopia_division.simetrico()
+etiopia_eugenia = Conexion(est_etiopia, est_eugenia, l_3, 0)
+eugenia_etiopia = etiopia_eugenia.simetrico()
+eugenia_division = Conexion(est_eugenia, est_division, l_3, 0)
+division_eugenia = eugenia_division.simetrico()
 division_zapata = Conexion(est_division, est_zapata, l_3, 0)
 zapata_division = division_zapata.simetrico()
 zapata_coyoacan = Conexion(est_zapata, est_coyoacan, l_3, 0)
@@ -170,8 +172,8 @@ CONEXIONES = [polanco_auditorio, auditorio_polanco, auditorio_constituyentes, co
               eje_central_parque_venados,balderas_juarez,juarez_balderas,balderas_ninos_heroes,
               ninos_heroes_balderas,ninos_heroes_hospital_general,hospital_general_ninos_heroes,
               hospital_general_centro_medico,centro_medico_hospital_general,centro_medico_etiopia,
-              etiopia_centro_medico,etiopia_division,division_etiopia,division_zapata,zapata_division,
+              etiopia_centro_medico, etiopia_eugenia, eugenia_etiopia,eugenia_division,division_eugenia,division_zapata,zapata_division,
               zapata_coyoacan,coyoacan_zapata,coyoacan_viveros,viveros_coyoacan,viveros_ma_quevedo,
               ma_quevedo_viveros,ma_quevedo_copilco,copilco_ma_quevedo,copilco_universidad,
-              universidad_copilco,
+              universidad_copilco
 ]

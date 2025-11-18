@@ -1,4 +1,4 @@
-from common.estacion import Estacion, Linea, Conexion
+from common.estacion import Estacion, Linea, Conexion, Transbordo
 
 from dataclasses import dataclass, field
 from cairo import Context, ImageSurface, FORMAT_ARGB32
@@ -16,27 +16,36 @@ def to_pil(surface: ImageSurface) -> Image.Image:
 
 @dataclass
 class Mapa:
-    estaciones: list[Estacion] = field(default_factory=list)
+    estaciones: dict[str, Estacion] = field(default_factory=dict)
     lineas: list[Linea] = field(default_factory=list)
-    conexion: dict[tuple[Estacion, Linea], tuple[tuple[Estacion, float], tuple[Estacion, float] | None]] \
+    adyacentes: dict[tuple[Estacion, Linea], tuple[tuple[Estacion, float], tuple[Estacion, float] | None]] \
         = field(default_factory=dict)
+    conexion: dict[tuple[Estacion, Estacion], tuple[Linea, float]] = field(default_factory=dict)
+    transbordos: list[Transbordo] = field(default_factory=list)
 
-    def set_mapa(self, estaciones: list[Estacion], lineas: list[Linea], conexiones: list[Conexion]):
-        self.estaciones = estaciones
+    def set_mapa(self, estaciones: list[Estacion], lineas: list[Linea], conexiones: list[Conexion], transbordos: list[Transbordo]):
+        # Formar la lista de transbordos
+        self.transbordos = transbordos
+        # Formar el diccionario de estaciones
+        for estacion in estaciones:
+            self.estaciones[estacion.nombre] = estacion
         self.lineas = lineas
+        # Formar las adyacencias y conexiones
         for conexion in conexiones:
-            elem = self.conexion.get((conexion.origen, conexion.linea))
-            if elem == None:
-                self.conexion[(conexion.origen, conexion.linea)] = ((conexion.dest, conexion.tiempo), None)
-            else:
-                self.conexion[(conexion.origen, conexion.linea)] = (elem[0], (conexion.dest, conexion.tiempo))
+            self.conexion[(conexion.origen, conexion.dest)] = (conexion.linea, conexion.tiempo)
 
-    """
-    Devuelve las estaciones adyacentes a la proporcionada, dada la linea.
-    Si la estacion no esta en la linea, devuelve None
-    """
+            elem = self.adyacentes.get((conexion.origen, conexion.linea))
+            if elem == None:
+                self.adyacentes[(conexion.origen, conexion.linea)] = ((conexion.dest, conexion.tiempo), None)
+            else:
+                self.adyacentes[(conexion.origen, conexion.linea)] = (elem[0], (conexion.dest, conexion.tiempo))
+
     def get_estaciones_adyacentes(self, est: Estacion, linea: Linea) -> tuple[Estacion, Estacion | None] | None:
-        elem = self.conexion.get((est, linea))
+        """
+        Devuelve las estaciones adyacentes a la proporcionada, dada la linea.
+        Si la estacion no esta en la linea, devuelve None
+        """
+        elem = self.adyacentes.get((est, linea))
         if elem == None:
             return None
         
@@ -45,6 +54,28 @@ class Mapa:
         if second == None:
             return (first[0], None)
         return (first[0], second[0])
+
+    def buscar_por_nombre(self, nombre: str) -> Estacion | None:
+        """
+        Devuelve la estacion con el nombre dado.
+        None si dicha estacion no existe
+        """
+        return self.estaciones.get(nombre)
+
+    def buscar_conexion(self, origen: Estacion, dest: Estacion) -> tuple[Linea, float] | None:
+        return self.conexion.get((origen, dest))
+
+    def buscar_transbordos(self, est: Estacion, l1: Linea, l2: Linea) -> Transbordo | None:
+        """
+        Devuelve la informacion de transbordo entre dos lineas en una estacion
+        """
+        for transbordo in self.transbordos:
+            if transbordo.estacion == est:
+                if transbordo.linea1 == l1 and transbordo.linea2 == l2:
+                    return transbordo
+                if transbordo.linea1 == l2 and transbordo.linea2 == l1:
+                    return transbordo
+        return None
 
     def seleccionar_siguiente_estacion(self, linea_actual: Linea, estacion_actual: Estacion, visitados: set[Estacion]) -> Estacion:
         vecinos = self.get_estaciones_adyacentes(estacion_actual, linea_actual)
@@ -94,7 +125,7 @@ class Mapa:
                 pass
             pass
 
-        for estacion in self.estaciones: 
+        for estacion in self.estaciones.values():
                 ctx.set_line_width(0.005)
                 ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
                 ctx.close_path()

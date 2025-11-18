@@ -1,1 +1,1 @@
-ALL = ["grafo"]
+ALL = ["Grafo", "Mapa"]

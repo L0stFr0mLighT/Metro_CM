@@ -39,6 +39,7 @@ def character_limit_min(entry_text):
                             
 ventana = customtkinter.CTk()
 ventana.geometry("1920x1080")
+ventana.iconbitmap('Imagenes/Logo_metro.ico')
 ventana.title("Metro Ciudad de Mexico")
 ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_rowconfigure(0, weight=1)

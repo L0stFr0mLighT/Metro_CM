@@ -8,27 +8,29 @@ mapa.dibujar_estaciones(ESTACIONES, LINEAS, 500, 500)
 
 # mapa.dibujar_estaciones(ESTACIONES, LINEAS, 100, 100)
 
+# Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
     if len(entry_text.get()) > 0:
-        primerCar = entry_text.get()[:1]
-        segundoCar = entry_text.get()[1:2]
-        if primerCar not in {"0", "1", "2"}:
+        primerCar = entry_text.get()[0]     # Coge el primer numero
+        segundoCar = entry_text.get()[1:2]  # Coge el segundo numero
+        if primerCar not in {"0", "1", "2"}: #Si no está en el rango de horas válidas, no saca nada
             entry_text.set("")
-        elif primerCar == "2" and segundoCar not in {"0", "1", "2", "3", "4"}:
-            entry_text.set(entry_text.get()[:1])
+        elif primerCar == "2" and segundoCar not in {"0", "1", "2", "3"}: # Jia es gay
+            entry_text.set("2")
         elif segundoCar not in {"0", "1", "2", "3", "4", "5", "6","7","8","9"}:
-            entry_text.set(entry_text.get()[:1])
+            entry_text.set(primerCar)
         
         entry_text.set(entry_text.get()[:2])
-    
+ 
+# Funcion que permite escribir minuto con formato correcto    
 def character_limit_min(entry_text):
     if len(entry_text.get()) > 0:
-        primerCar = entry_text.get()[:1]
+        primerCar = entry_text.get()[0]
         segundoCar = entry_text.get()[1:2]
         if primerCar not in {"0", "1", "2", "3", "4", "5"}:
             entry_text.set("")
         elif segundoCar not in {"0", "1", "2", "3", "4", "5", "6","7","8","9"}:
-            entry_text.set(entry_text.get()[:1])
+            entry_text.set(primerCar)
         
         entry_text.set(entry_text.get()[:2])
                             

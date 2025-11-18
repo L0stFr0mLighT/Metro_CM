@@ -1,36 +1,52 @@
 from dataclasses import dataclass, field
 
-@dataclass
-class Linea:
-    numero: int
-    cabeceras: tuple['Estacion', 'Estacion'] = field(default_factory=tuple)
-    color: tuple[float, float, float] = field(default_factory=tuple)
-
-    def set_cabeceras(self, cabeceras: tuple['Estacion', 'Estacion']):
-        self.cabeceras = cabeceras
-    
-    def set_color(self, red: float, green: float, blue: float):
-        self.color = (red / 255, green / 255, blue / 255)
-
-
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Estacion:
+    """
+    Representa una estacion
+    """
     nombre: str
-    vecinos: list[tuple['Estacion', 'Estacion | None', Linea]] = field(default_factory=list)
-    pos_mapa: tuple[float, float] = field(default_factory=tuple)
+    pos_mapa: tuple[float, float]
     # TODO: Añadir mas informacion si es necesario
 
-    """ 
-    Agrega dos vecinos a la estacion
+@dataclass(eq=True, frozen=True)
+class Linea:
     """
-    def add_vecinos(self, v1: 'Estacion', v2: 'Estacion', linea: Linea):
-        self.vecinos.append((v1, v2, linea))
-    
+    Representa una linea
     """
-    Agrega un unico vecino
+    numero: int
+    cabeceras: tuple[Estacion, Estacion]
+    color: tuple[float, float, float]
+
+    @classmethod
+    def crear_linea(cls, numero: int,cabeceras: tuple[Estacion, Estacion], color: tuple[float, float, float]) -> 'Linea':
+        return Linea(numero, cabeceras, (color[0] / 255, color[1] / 255, color[2] / 255))
+
+@dataclass
+class Conexion:
     """
-    def add_unico_vecino(self, v: 'Estacion', linea: Linea):
-        self.vecinos.append((v, None, linea))
-    
-    def set_pos_mapa(self, pos: tuple[float, float]):
-        self.pos_mapa = pos
+    Representa una conexion de dos estaciones a traves de una linea
+    NOTA: No se puede tratar como un tipo simetrico; es decir, 
+    {est1, est2, linea, tiempo} != {est2, est1, linea, tiempo}
+    """
+    origen: Estacion
+    dest: Estacion
+    linea: Linea
+    tiempo: float
+
+    def simetrico(self) -> 'Conexion':
+        return Conexion(self.dest, self.origen, self.linea, self.tiempo)
+
+    def set_tiempo(self, tiempo: float):
+        self.tiempo = tiempo
+
+@dataclass
+class Transbordo:
+    """
+    Representa un trasbordo de dos lineas en una estacion. Se verifica
+    {est, linea1, linea2, t} == {est, linea2, linea1, t}
+    """
+    estacion: Estacion
+    linea1: Linea
+    linea2: Linea
+    tiempo_trasbordo: float    

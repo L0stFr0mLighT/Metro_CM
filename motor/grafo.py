@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from networkx import DiGraph
+from networkx import Graph
 
 from common.estacion import Estacion, Linea, Conexion, Transbordo
 
@@ -15,21 +15,17 @@ class Grafo:
 
     Las aristas son las conexiones entre estaciones a traves de una linea.
     """
-    grafo: DiGraph = DiGraph()
+    grafo: Graph = Graph()
 
     def set_grafo(self, conexiones: list[Conexion], transbordos: list[Transbordo]):
         # TODO: Añadir mas datos aqui
         for conexion in conexiones:
             # Añado las estaciones "generales"
-            # TODO: El grafo debe ser dirigido?
             self.grafo.add_edge((conexion.origen, None), (conexion.origen, conexion.linea))
-            self.grafo.add_edge((conexion.origen, conexion.linea), (conexion.origen, None))
 
             self.grafo.add_edge((conexion.dest, None), (conexion.dest, conexion.linea))
-            self.grafo.add_edge((conexion.dest, conexion.linea), (conexion.dest, None))
 
             self.grafo.add_edge((conexion.origen, conexion.linea), (conexion.dest, conexion.linea))
         
         for transbordo in transbordos:
             self.grafo.add_edge((transbordo.estacion, transbordo.linea1), (transbordo.estacion, transbordo.linea2))
-            self.grafo.add_edge((transbordo.estacion, transbordo.linea2), (transbordo.estacion, transbordo.linea1))

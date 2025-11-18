@@ -1,12 +1,15 @@
 import customtkinter
-from estaciones import ESTACIONES, LINEAS
-import mapa
+from estaciones import *
+from networkx import astar_path
+from motor.mapa import Mapa
 
-mapa.dibujar_estaciones(ESTACIONES, LINEAS, 500, 500)
+mapa = Mapa()
+mapa = mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
+
 
 # TODO: Interfaz grafica
 
-# mapa.dibujar_estaciones(ESTACIONES, LINEAS, 100, 100)
+customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 
 def character_limit_hour(entry_text):
     if len(entry_text.get()) > 0:
@@ -40,74 +43,74 @@ ventana.grid_rowconfigure(0, weight=1)
 
 entry_hora = customtkinter.StringVar(ventana, "")
 entry_min = customtkinter.StringVar(ventana, "")
-
-# TODO:Color Provisional 
-frameIzquierda = customtkinter.CTkFrame(ventana, width=1000 , height=1080 , fg_color="white")
-frameIzquierda.grid_rowconfigure(0, weight=1)
-frameIzquierda.grid(row=0, column=0, sticky="nsw")
-
-frameIzquierdaArriba = customtkinter.CTkFrame(frameIzquierda, width=1000, height=500, fg_color="black")
-# frameIzquierdaArriba.grid_rowconfigure((1,2), weight=1)
-frameIzquierdaArriba.grid_columnconfigure((2), weight=1)
-frameIzquierdaArriba.grid(row=0, column=0, sticky= "nwse")
-
-frameIzquierdaAbajo = customtkinter.CTkFrame(frameIzquierda, width= 1000, height=500, fg_color="grey")
-frameIzquierdaAbajo.grid(row=1, column=0)
-
-frameDerecha = customtkinter.CTkFrame(ventana, fg_color=ventana.cget("fg_color"))
-# frameDerecha.pack(side="right", padx=20, fill="both", expand= False)
-
 estaciones_names = [getattr(e, "nombre") for e in ESTACIONES]
 
-origen = customtkinter.CTkOptionMenu(frameIzquierdaArriba, values=estaciones_names)
-# origen.pack(side="left", anchor="nw", padx=10, pady=20)
+# TODO:Color Provisional 
+frameTexto = customtkinter.CTkFrame(ventana, width=1000 , height=1080, fg_color="grey19")
+frameTexto.grid(row=0, column=0, sticky="nsw")
+
+frameOrigen_Destino = customtkinter.CTkFrame(frameTexto, width=500, height=200, fg_color=frameTexto.cget("fg_color"))
+frameOrigen_Destino.grid(row=0, column=0, pady=(20,0), padx=20, sticky="nw")
+
+etiqOrigen = customtkinter.CTkLabel(frameOrigen_Destino, text="Origen:")
+etiqOrigen.grid(row=0, column=0, padx=7, sticky="w")
+etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino:")
+etiqDestino.grid(row=0, column=1, padx=7, sticky="w")
+
+# # origen.pack(side="left", anchor="nw", padx=10, pady=20)
+origen = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names)
 origen.grid(row=1, column=0, sticky="w")
 
-destino = customtkinter.CTkOptionMenu(frameIzquierdaArriba, values=estaciones_names)
-# destino.pack(side="left", anchor="nw", padx=10, pady= 20)
-destino.grid(row=1, column=2, sticky="w")
+destino = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names)
+destino.grid(row=1, column=1, sticky="w")
 
-etiqOrigen = customtkinter.CTkLabel(frameIzquierdaArriba, text="Origen")
-etiqOrigen.grid(row=0, column=0, padx=10, sticky="w")
-etiqDestino = customtkinter.CTkLabel(frameIzquierdaArriba, text="Destino")
-etiqDestino.grid(row=0, column=2, sticky="w")
 
-hora = customtkinter.CTkEntry(frameIzquierdaArriba, width=50, height=20, placeholder_text="00", textvariable=entry_hora)
-hora.grid(row=2, column=0, sticky="e")
+
+frameEntryTiempo = customtkinter.CTkFrame(frameTexto, width=500, height=200, fg_color=frameTexto.cget("fg_color"))
+frameEntryTiempo.grid_columnconfigure(2, weight=1)
+frameEntryTiempo.grid(row=1, column=0, padx=20, pady=20, sticky="nw")
+
+etiqSalida = customtkinter.CTkLabel(frameEntryTiempo, text="Hora de salida (HH:MM):")
+etiqSalida.grid(row=0, column=0, columnspan = 3, sticky="ew")
+
+hora = customtkinter.CTkEntry(frameEntryTiempo, width=50, height=20, placeholder_text="00", textvariable=entry_hora)
+hora.grid(row=1, column=0, sticky="w")
 entry_hora.trace("w", lambda *args: character_limit_hour(entry_hora))
 
-dosPuntos = customtkinter.CTkLabel(frameIzquierdaArriba, text=":")
-dosPuntos.grid(row=2, column=1, sticky="w")
+dosPuntos = customtkinter.CTkLabel(frameEntryTiempo, text=":")
+dosPuntos.grid(row=1, column=1, sticky="w")
 
-minuto = customtkinter.CTkEntry(frameIzquierdaArriba, width=50, height=20, placeholder_text="00", textvariable=entry_min)
-minuto.grid(row=2, column=2, sticky="w")
+minuto = customtkinter.CTkEntry(frameEntryTiempo, width=50, height=20, placeholder_text="00", textvariable=entry_min)
+minuto.grid(row=1, column=2, padx=1, sticky="w")
 entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 
-opcion1 = customtkinter.CTkCheckBox(frameIzquierdaArriba, text="Menos trasbordos")
-opcion1.grid(row=1, column=4)
-opcion2 = customtkinter.CTkCheckBox(frameIzquierdaArriba, text="Adaptado para silla de ruedas")
-opcion2.grid(row=1, column=5)
 
-# img = Image.open("imagenes/lupa.png") 
-# img = img.resize((50, 50), Image.LANCZOS)  # Resize to fit button    ns q hace esto jeje
-# button_image = ImageTk.PhotoImage(img)
-# lupa = customtkinter.CTkButton(frameIzquierdaArriba, image=button_image)
-# lupa.image=button_image
-# lupa.grid(row=2, column=5, padx=10)
+framePreferencias = customtkinter.CTkFrame(frameTexto, width=100, height=200, fg_color=frameTexto.cget("fg_color"))
+framePreferencias.grid(row=2, column=0, padx=20, pady=(20))
+etiqPreferencias = customtkinter.CTkLabel(framePreferencias, text="Preferencias de viaje:")
+etiqPreferencias.grid(row=0, column=0, sticky="w")
 
-# def ajustes(ventana):
-#     ajustes = customtkinter.CTkToplevel(ventana)
-#     ajustes.geometry("120"x"120")
-#     modoOscuro = customtkinter.CtkSwitch(ajustes, command=cambio_switch, text="Modo oscuro")
-#     modoOscuro.pack(ajustes)
+opcion1 = customtkinter.CTkCheckBox(framePreferencias, text="Menos trasbordos")
+opcion1.grid(row=1, column=0, pady= 5, sticky= "w")
+opcion2 = customtkinter.CTkCheckBox(framePreferencias, text="Baja Movilidad")
+opcion2.grid(row=2, column=0, sticky= "w", padx=(0,500))
+
+# # img = Image.open("imagenes/lupa.png") 
+# # img = img.resize((50, 50), Image.LANCZOS)  # Resize to fit button    ns q hace esto jeje
+# # button_image = ImageTk.PhotoImage(img)
+# # lupa = customtkinter.CTkButton(frameIzquierdaArriba, image=button_image)
+# # lupa.image=button_image
+# # lupa.grid(row=2, column=5, padx=10)
+
+# # def ajustes(ventana):
+# #     ajustes = customtkinter.CTkToplevel(ventana)
+# #     ajustes.geometry("120"x"120")
+# #     modoOscuro = customtkinter.CtkSwitch(ajustes, command=cambio_switch, text="Modo oscuro")
+# #     modoOscuro.pack(ajustes)
 
 
-
-
-
-
-
-
+frameMapa = customtkinter.CTkFrame(ventana, fg_color=ventana.cget("fg_color"))
+frameMapa.grid(row=0, column=1, sticky="nsew")
 
 
 

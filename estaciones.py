@@ -172,8 +172,8 @@ CONEXIONES = [polanco_auditorio, auditorio_polanco, auditorio_constituyentes, co
               eje_central_parque_venados,balderas_juarez,juarez_balderas,balderas_ninos_heroes,
               ninos_heroes_balderas,ninos_heroes_hospital_general,hospital_general_ninos_heroes,
               hospital_general_centro_medico,centro_medico_hospital_general,centro_medico_etiopia,
-              etiopia_centro_medico, etiopia_eugenia, eugenia_etiopia,eugenia_division,division_eugenia,division_zapata,zapata_division,
-              zapata_coyoacan,coyoacan_zapata,coyoacan_viveros,viveros_coyoacan,viveros_ma_quevedo,
-              ma_quevedo_viveros,ma_quevedo_copilco,copilco_ma_quevedo,copilco_universidad,
+              etiopia_centro_medico, etiopia_eugenia, eugenia_etiopia,eugenia_division,division_eugenia,
+              division_zapata,zapata_division, zapata_coyoacan,coyoacan_zapata,coyoacan_viveros,viveros_coyoacan,
+              viveros_ma_quevedo, ma_quevedo_viveros,ma_quevedo_copilco,copilco_ma_quevedo,copilco_universidad,
               universidad_copilco
 ]

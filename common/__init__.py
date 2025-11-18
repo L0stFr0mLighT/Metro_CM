@@ -1,1 +1,1 @@
-ALL = ["estacion", "linea"]
+ALL = ["Estacion", "Linea", "Conexion", "Trasbordo"]

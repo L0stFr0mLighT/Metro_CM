@@ -48,8 +48,8 @@ def character_limit_min(entry_text):
 # Frame principal
 # -----------------
 ventana = customtkinter.CTk()
-#ventana.geometry("1200x800") 
-ventana.after(0, lambda: ventana.state("zoomed")) # solo funciona en Windows
+ventana.geometry("1200x800") 
+#ventana.after(0, lambda: ventana.state("zoomed")) # solo funciona en Windows
 ventana.iconbitmap('Imagenes/Logo_metro.ico')
 ventana.title("Metro Ciudad de Mexico")
 ventana.grid_columnconfigure(0, weight=1)
@@ -102,7 +102,7 @@ botonBuscar.grid(row=0, column=2, rowspan=2, padx=10, sticky="e")
 # Frame entrada hora
 # -------------------
 frameEntryTiempo = customtkinter.CTkFrame(frameBorde, fg_color= "green")
-frameEntryTiempo.grid_columnconfigure((0,1,2), weight=1)
+frameEntryTiempo.grid_columnconfigure((0,2), weight=1)
 frameEntryTiempo.grid(row=1, column=0, sticky="nsew", pady=(10,10))
 
 entry_hora = customtkinter.StringVar(ventana, "") # Etiqueta y Entrys para la hora de salida
@@ -111,13 +111,13 @@ entry_min = customtkinter.StringVar(ventana, "")
 etiqSalida = customtkinter.CTkLabel(frameEntryTiempo, text="Hora de salida (HH:MM):", font=fuente_base)
 etiqSalida.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0,5))
 
-hora = customtkinter.CTkEntry(frameEntryTiempo, textvariable=entry_hora, font=fuente_base)
-hora.grid(row=1, column=0, sticky="ew", padx=5)
+hora = customtkinter.CTkEntry(frameEntryTiempo, width=50, height=20,textvariable=entry_hora, font=fuente_base)
+hora.grid(row=1, column=0, sticky="e", padx=5)
 entry_hora.trace("w", lambda *args: character_limit_hour(entry_hora))
 dosPuntos = customtkinter.CTkLabel(frameEntryTiempo, text=":", font=fuente_base)
 dosPuntos.grid(row=1, column=1, sticky="ew")
-minuto = customtkinter.CTkEntry(frameEntryTiempo, textvariable=entry_min, font=fuente_base)
-minuto.grid(row=1, column=2, sticky="ew", padx=5)
+minuto = customtkinter.CTkEntry(frameEntryTiempo,width=50, height=20, textvariable=entry_min, font=fuente_base)
+minuto.grid(row=1, column=2, sticky="w", padx=5)
 entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 
 # --------------------

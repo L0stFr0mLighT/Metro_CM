@@ -18,12 +18,8 @@ def abrir_ajustes():
     ajustes.title("Ajustes")
     ajustes.after(10, lambda: ajustes.focus_force()) # Hace que la ventana de ajustes esté por arriba
     ajustes.grab_set()                               # Hace que no se pueda interactuar con la ventana principal hasta cerrar esta
-    ajustes.resizable(False, False)    
-    # No permite cambiar tamaño de la ventana
-    tabs = customtkinter.CTkTabview(ajustes)
-    tabs.add("Ajustes")
-    tabs.set("Ajustes")
-    tabs.pack(fill="both", expand=True, padx=10, pady=10)
+    ajustes.resizable(False, False)                  # No permite cambiar tamaño de la ventana
+    
     tabs = customtkinter.CTkTabview(ajustes)
     tabs.add("Ajustes")
     tabs.set("Ajustes")

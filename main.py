@@ -25,12 +25,12 @@ def character_limit_hour(entry_text):
         segundoCar = entry_text.get()[1:2]  # Coge el segundo numero
         if primerCar not in {"0", "1", "2"}: #Si no está en el rango de horas válidas, no saca nada
             entry_text.set("")
-        elif primerCar == "2" and segundoCar not in {"0", "1", "2", "3"}: # Jia es gay
+        elif primerCar == "2" and segundoCar not in {"0", "1", "2", "3"}:
             entry_text.set("2")
         elif segundoCar not in {"0", "1", "2", "3", "4", "5", "6","7","8","9"}:
             entry_text.set(primerCar)
-        
-        entry_text.set(entry_text.get()[:2])
+        else:
+          entry_text.set(entry_text.get()[:2])
  
 # Funcion que permite escribir minuto con formato correcto    
 def character_limit_min(entry_text):
@@ -41,8 +41,8 @@ def character_limit_min(entry_text):
             entry_text.set("")
         elif segundoCar not in {"0", "1", "2", "3", "4", "5", "6","7","8","9"}:
             entry_text.set(primerCar)
-        
-        entry_text.set(entry_text.get()[:2])
+        else:
+            entry_text.set(entry_text.get()[:2])
 
 # -----------------
 # Frame principal
@@ -59,7 +59,7 @@ ventana.grid_rowconfigure(0, weight=1)
 fuente_base = customtkinter.CTkFont(family="Roboto", size=16) # Fuente base para los textos
 
 estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
-estaciones_names.sort()
+estaciones_names.sort() # Ordena las estaciones alfabeticamente
 
 # ------------------------
 # Frame izquierdo (texto)
@@ -80,30 +80,32 @@ frameBorde.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 # -------------------------
 # Frame origen y destino
 # -------------------------
-frameOrigen_Destino = customtkinter.CTkFrame(frameBorde, fg_color= "blue")
-frameOrigen_Destino.grid_columnconfigure((0,1,2), weight=1)
-frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", pady=(10,10))
+# TODO: Una esquina no redondeada por la puta cara
+frameOrigen_Destino = customtkinter.CTkFrame(frameBorde, fg_color= "blue", corner_radius=6)
+frameOrigen_Destino.grid_columnconfigure((0,1), weight=1)
+frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", pady=10)
 
-etiqOrigen = customtkinter.CTkLabel(frameOrigen_Destino, text="Origen:", font=fuente_base)
-etiqOrigen.grid(row=0, column=0, padx=10, sticky="w")
-etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino:", font=fuente_base)
-etiqDestino.grid(row=0, column=1, padx=10, sticky="w")
+etiqOrigen = customtkinter.CTkLabel(frameOrigen_Destino, text="Origen", font=fuente_base, corner_radius=6)
+etiqOrigen.grid(row=0, column=0, padx=(0,18), sticky="ew")
+etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino", font=fuente_base, corner_radius=6)
+etiqDestino.grid(row=0, column=1, padx=(0,18), sticky="ew")  
 
-origen = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base)
+# TODO: No cambiar tamaño al cambiar la opcion. Mirar con combo box o scrollable frame + radio buttons
+origen = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base, anchor="center")
 origen.grid(row=1, column=0, padx=5, sticky="ew")
-destino = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base)
+destino = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base, anchor="center")
 destino.grid(row=1, column=1, padx=5, sticky="ew")
 
-lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png").resize((30, 30)), size=(30, 30)) # Botón lupa
-botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, image=lupa_imagen, text="", width=50, height=50)
-botonBuscar.grid(row=0, column=2, rowspan=2, padx=10, sticky="e")
+lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png").resize((25, 25)), size=(25, 25)) # Botón lupa
+botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
+botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
 
 # -------------------
 # Frame entrada hora
 # -------------------
 frameEntryTiempo = customtkinter.CTkFrame(frameBorde, fg_color= "green")
 frameEntryTiempo.grid_columnconfigure((0,2), weight=1)
-frameEntryTiempo.grid(row=1, column=0, sticky="nsew", pady=(10,10))
+frameEntryTiempo.grid(row=1, column=0, sticky="nsew", pady=10)
 
 entry_hora = customtkinter.StringVar(ventana, "") # Etiqueta y Entrys para la hora de salida
 entry_min = customtkinter.StringVar(ventana, "")
@@ -125,7 +127,7 @@ entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 # --------------------
 framePreferencias = customtkinter.CTkFrame(frameBorde, fg_color="red")
 framePreferencias.grid_columnconfigure(0, weight=1)
-framePreferencias.grid(row=2, column=0, sticky="nsew", pady=(10,10))
+framePreferencias.grid(row=2, column=0, sticky="nsew", pady=10)
 
 etiqPreferencias = customtkinter.CTkLabel(framePreferencias, text="Preferencias de viaje:", font=fuente_base)
 etiqPreferencias.grid(row=0, column=0, sticky="w", pady=(0,5))
@@ -140,7 +142,7 @@ opcion2.grid(row=2, column=0, sticky="w", pady=5)
 # ----------------
 frameResultado = customtkinter.CTkFrame(frameBorde, fg_color="purple")
 frameResultado.grid_columnconfigure(0, weight=1)
-frameResultado.grid(row=3, column=0, sticky="nsew", pady=(10,10))
+frameResultado.grid(row=3, column=0, sticky="nsew", pady=10)
 
 # -----------------------------
 # Frame principal derecho (mapa)

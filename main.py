@@ -10,13 +10,38 @@ mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
 
 # TODO: Interfaz grafica
 
-customtkinter.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 
-# def ajustes(ventana):
-#     ajustes = customtkinter.CTkToplevel(ventana)
-#     ajustes.geometry("120"x"120")
-#     modoOscuro = customtkinter.CtkSwitch(ajustes, command=cambio_switch, text="Modo oscuro")
-#     modoOscuro.pack(ajustes)
+def abrir_ajustes():
+    ajustes = customtkinter.CTkToplevel(ventana)
+    ajustes.title("Ajustes")
+    ajustes.after(10, lambda: ajustes.focus_force()) # Hace que la ventana de ajustes esté por arriba
+    ajustes.grab_set()                               # Hace que no se pueda interactuar con la ventana principal hasta cerrar esta
+    ajustes.resizable(False, False)                  # No permite cambiar tamaño de la ventana
+    ajustes.grid_columnconfigure(0, weight=1)
+    ajustes.grid_rowconfigure((0,1), weight=1)
+    
+    w_root = ventana.winfo_width()                   # Obtener tamaño y posición de la ventana principal
+    h_root = ventana.winfo_height()
+    x_top = (w_root - 240) // 2                      # Calcular posición centrada
+    y_top = (h_root - 240) // 2
+    ajustes.geometry(f"{240}x{240}+{x_top}+{y_top}") 
+    
+    modo = True if customtkinter.get_appearance_mode() == "Dark" else False
+    switch_var = customtkinter.BooleanVar(value=modo) 
+    texto = "Modo oscuro" if modo else "Modo claro"
+    etiqueta_ajustes = customtkinter.CTkLabel(ajustes, text=texto, font=fuente_base)
+    etiqueta_ajustes.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
+    modoOscuro = customtkinter.CTkSwitch(ajustes, command=lambda: cambio_switch(modoOscuro, etiqueta_ajustes), variable=switch_var, text="", switch_width=60, switch_height=30)
+    modoOscuro.grid(row=1, column=0, padx=(0,45), pady=10, sticky="nse")
+    
+def cambio_switch(switch, etiqueta):
+    if (switch.get() == 0):
+        customtkinter.set_appearance_mode("Light")
+        etiqueta.configure(text="Modo claro")
+    else:
+        customtkinter.set_appearance_mode("Dark") 
+        etiqueta.configure(text="Modo oscuro")
 
 # Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
@@ -99,6 +124,10 @@ destino.grid(row=1, column=1, padx=5, sticky="ew")
 lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png").resize((25, 25)), size=(25, 25)) # Botón lupa
 botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
+
+ajustes_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25)) # Botón ajustes
+botonAjustes = customtkinter.CTkButton(ventana, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
+botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="ne")
 
 # -------------------
 # Frame entrada hora

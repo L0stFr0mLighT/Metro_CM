@@ -15,16 +15,21 @@ def sumar_hora(hora: str, min: str, suma: int) -> tuple[str, str]:
     valor_hora = int(hora)
     nuevo_valor = (valor_hora + suma) % 24
 
-    return formatear_hora_min(nuevo_valor, int(min))
+    return formatear_hora_min(nuevo_valor, str_to_int(min))
     
 def sumar_minutos(hora: str, min: str, suma: int) -> tuple[str, str]:
-    valor_min = int(min)
+    valor_min = str_to_int(min)
     valor_hora = int(hora)
 
     valor_min_raw = valor_min + suma
     
-    horas_pasadas = math.floor(valor_min_raw) // 60
+    horas_pasadas = math.floor( float(valor_min_raw)/60 )
     nueva_hora = (valor_hora + horas_pasadas) % 24
     nuevo_min = valor_min_raw % 60
 
     return formatear_hora_min(nueva_hora, nuevo_min)
+
+def str_to_int(x):
+    if(x == ""):
+        return 0
+    return int(x)

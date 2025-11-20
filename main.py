@@ -18,9 +18,18 @@ def abrir_ajustes():
     ajustes.title("Ajustes")
     ajustes.after(10, lambda: ajustes.focus_force()) # Hace que la ventana de ajustes esté por arriba
     ajustes.grab_set()                               # Hace que no se pueda interactuar con la ventana principal hasta cerrar esta
-    ajustes.resizable(False, False)                  # No permite cambiar tamaño de la ventana
-    ajustes.grid_columnconfigure(0, weight=1)
-    ajustes.grid_rowconfigure((0,1), weight=1)
+    ajustes.resizable(False, False)    
+    # No permite cambiar tamaño de la ventana
+    tabs = customtkinter.CTkTabview(ajustes)
+    tabs.add("Ajustes")
+    tabs.set("Ajustes")
+    tabs.pack(fill="both", expand=True, padx=10, pady=10)
+    tabs = customtkinter.CTkTabview(ajustes)
+    tabs.add("Ajustes")
+    tabs.set("Ajustes")
+    tabs.pack(fill="both", expand=True, padx=10, pady=10)
+    tabs.tab("Ajustes").grid_columnconfigure(0, weight=1)
+    tabs.tab("Ajustes").grid_rowconfigure((0,1), weight=1)
     
     w_root = ventana.winfo_width()                   # Obtener tamaño y posición de la ventana principal
     h_root = ventana.winfo_height()
@@ -31,10 +40,10 @@ def abrir_ajustes():
     modo = True if customtkinter.get_appearance_mode() == "Dark" else False
     switch_var = customtkinter.BooleanVar(value=modo) 
     texto = "Modo oscuro" if modo else "Modo claro"
-    etiqueta_ajustes = customtkinter.CTkLabel(ajustes, text=texto, font=fuente_base)
+    etiqueta_ajustes = customtkinter.CTkLabel(tabs.tab("Ajustes"), text=texto, font=fuente_base)
     etiqueta_ajustes.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
-    modoOscuro = customtkinter.CTkSwitch(ajustes, command=lambda: cambio_switch(modoOscuro, etiqueta_ajustes), variable=switch_var, text="", switch_width=60, switch_height=30)
-    modoOscuro.grid(row=1, column=0, padx=(0,45), pady=10, sticky="nse")
+    modoOscuro = customtkinter.CTkSwitch(tabs.tab("Ajustes"), command=lambda: cambio_switch(modoOscuro, etiqueta_ajustes), variable=switch_var, text="", switch_width=60, switch_height=30)
+    modoOscuro.grid(row=1, column=0, padx=(0,30), pady=10, sticky="nse")
     
 def cambio_switch(switch, etiqueta):
     if (switch.get() == 0):
@@ -43,6 +52,14 @@ def cambio_switch(switch, etiqueta):
     else:
         customtkinter.set_appearance_mode("Dark") 
         etiqueta.configure(text="Modo oscuro")
+
+def buscar_rutas():
+    origen_text = origen.get()
+    destino_text = destino.get()
+    menos_trasbordos = opcion1.get()
+    baja_movilidad = opcion2.get()
+    hora_salida = entry_hora.get() + ":" + entry_min.get()
+
 
 # Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
@@ -101,26 +118,7 @@ def min_button_callback(entry_hora, entry_min, paso):
     (hora, min)= sumar_minutos(entry_hora.get(), entry_min.get(), paso)
     entry_hora.set(hora)
     entry_min.set(min)
-    # if modo:
-    #     value = float(hora.get()) + paso
-    #     if len(hora.get()) == 1:
-    #         hora.set("0" + str(value))
-    #     elif value >= 24:
-    #         hora.set("00")
-    #     else:
-    #         hora.set(value % 24)
-    # else:
-    #     value = float(min.get()) + paso
-    #     if len(min.get()) == 1:
-    #         min.set("0" + str(value))
-    #     elif value >= 60:
-    #         min.set("00")
-    #         hora.set((hora.get()+ 1) % 24)
-    #     elif value < 0:
-    #         min.set("55")
-    #         hora.set((hora.get()- 1) % 24)
-    #     else:
-    #         min.set(value)              
+                
             
 # -----------------
 # Frame principal
@@ -144,22 +142,22 @@ estaciones_names.sort() # Ordena las estaciones alfabeticamente
 # ------------------------
 frameTexto = customtkinter.CTkFrame(ventana, fg_color="grey19") # TODO:Color Provisional 
 frameTexto.grid_columnconfigure(0, weight=1)
-frameTexto.grid_rowconfigure(0, weight=1)
+frameTexto.grid_rowconfigure(3, weight=1)
 frameTexto.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
 # --------------------------------------------------
-# Frame borde (contiene todos los frames interiores)
-# --------------------------------------------------
-frameBorde = customtkinter.CTkFrame(frameTexto, fg_color="grey", corner_radius=0)
-frameBorde.grid_columnconfigure(0, weight=1)
-frameBorde.grid_rowconfigure(3, weight=1) # Para que el frame resultado crezca hasta el final
-frameBorde.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+# # Frame borde (contiene todos los frames interiores)
+# # --------------------------------------------------
+# frameBorde = customtkinter.CTkFrame(frameTexto, fg_color="grey", corner_radius=0)
+# frameBorde.grid_columnconfigure(0, weight=1)
+# frameBorde.grid_rowconfigure(3, weight=1) # Para que el frame resultado crezca hasta el final
+# frameBorde.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
 # -------------------------
 # Frame origen y destino
 # -------------------------
 # TODO: Una esquina no redondeada por la puta cara
-frameOrigen_Destino = customtkinter.CTkFrame(frameBorde, fg_color= "blue", corner_radius=6)
+frameOrigen_Destino = customtkinter.CTkFrame(frameTexto, fg_color= "blue", corner_radius=6)
 frameOrigen_Destino.grid_columnconfigure((0,1), weight=1)
 frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", pady=10)
 
@@ -185,12 +183,12 @@ botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="ne")
 # -------------------
 # Frame entrada hora
 # -------------------
-frameEntryTiempo = customtkinter.CTkFrame(frameBorde, fg_color= "green")
+frameEntryTiempo = customtkinter.CTkFrame(frameTexto, fg_color= "green")
 frameEntryTiempo.grid_columnconfigure((0,2), weight=1)
 frameEntryTiempo.grid(row=1, column=0, sticky="nsew", pady=10)
 
-entry_hora = customtkinter.StringVar(ventana, "") # Etiqueta y Entrys para la hora de salida
-entry_min = customtkinter.StringVar(ventana, "")
+entry_hora = customtkinter.StringVar(ventana, "00") # Etiqueta y Entrys para la hora de salida
+entry_min = customtkinter.StringVar(ventana, "00")
 
 etiqSalida = customtkinter.CTkLabel(frameEntryTiempo, text="Hora de salida (HH:MM):", font=fuente_base)
 etiqSalida.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0,5))
@@ -219,7 +217,7 @@ entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 # --------------------
 # Frame Preferencias
 # --------------------
-framePreferencias = customtkinter.CTkFrame(frameBorde, fg_color="red")
+framePreferencias = customtkinter.CTkFrame(frameTexto, fg_color="red")
 framePreferencias.grid_columnconfigure(0, weight=1)
 framePreferencias.grid(row=2, column=0, sticky="nsew", pady=10)
 
@@ -234,7 +232,7 @@ opcion2.grid(row=2, column=0, sticky="w", pady=5)
 # ----------------
 # Frame resultado
 # ----------------
-frameResultado = customtkinter.CTkFrame(frameBorde, fg_color="purple")
+frameResultado = customtkinter.CTkFrame(frameTexto, fg_color="purple")
 frameResultado.grid_columnconfigure(0, weight=1)
 frameResultado.grid(row=3, column=0, sticky="nsew", pady=10)
 

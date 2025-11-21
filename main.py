@@ -4,6 +4,7 @@ from networkx import astar_path
 from motor.mapa import Mapa
 from PIL import Image
 from tiempo.tiempo import sumar_hora, sumar_minutos
+from CTkScrollableDropdown import CTkScrollableDropdown
 
 mapa = Mapa()
 mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
@@ -167,11 +168,14 @@ etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino", font=f
 etiqDestino.grid(row=0, column=1, padx=(0,18), sticky="ew")  
 
 # TODO: No cambiar tamaño al cambiar la opcion. Mirar con combo box o scrollable frame + radio buttons
-origen = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base, anchor="center")
+origen = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center")
+CTkScrollableDropdown(origen, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
 # TODO: a lo mejor queda mejor con:
 # origen.grid(row=1, column=0, padx= 10, sticky="ew")
 origen.grid(row=1, column=0)
-destino = customtkinter.CTkOptionMenu(frameOrigen_Destino, values=estaciones_names, font=fuente_base, anchor="center")
+
+destino = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center")
+CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
 # TODO: a lo mejor queda mejor con:
 # destino.grid(row=1, column=1, padx= 10, sticky="ew")
 destino.grid(row=1, column=1)

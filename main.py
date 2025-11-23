@@ -27,15 +27,15 @@ def abrir_ajustes():
     tabs.add(apariencia_name)
     tabs.set(apariencia_name)
     tab_actual = tabs.tab(apariencia_name)
-    tabs.pack(fill="both", expand=True, padx=10, pady=10)
+    tabs.pack(fill="both", expand=True, padx=5, pady=10)
     tabs.tab(apariencia_name).grid_columnconfigure((0,1), weight=1)
     tabs.tab(apariencia_name).grid_rowconfigure((0,1,2), weight=1)
     
     w_root = ventana.winfo_width()                   # Obtener tamaño y posición de la ventana principal
     h_root = ventana.winfo_height()
-    x_top = (w_root - 240) // 2                      # Calcular posición centrada
-    y_top = (h_root - 240) // 2
-    ajustes.geometry(f"{240}x{240}+{x_top}+{y_top}") 
+    x_top = (w_root - 250) // 2                      # Calcular posición centrada
+    y_top = (h_root - 250) // 2
+    ajustes.geometry(f"{250}x{250}+{x_top}+{y_top}") 
     
     modo = True if customtkinter.get_appearance_mode() == "Dark" else False
     switch_var = customtkinter.BooleanVar(value=modo) 
@@ -46,28 +46,28 @@ def abrir_ajustes():
     idioma_var = customtkinter.StringVar(value=TRADUCCIONES[idioma]["idiomas"][IDIOMAS.index(idioma)])
     idiomaBoton = customtkinter.CTkSegmentedButton(tab_actual, values=TRADUCCIONES[idioma]["idiomas"], font=fuente_base, variable=idioma_var) # Francés?
     idiomaBoton.configure(command=lambda value: cambio_idioma(ajustes, tabs, idiomaBoton, idiomaBoton.cget("values").index(idiomaBoton.get())))
-    idiomaBoton.grid(row=1, column=0, padx=5, pady=10, sticky="ew",columnspan=2)
+    idiomaBoton.grid(row=1, column=0, padx=2, pady=10, sticky="ew",columnspan=2)
     
     tipo_var = customtkinter.StringVar(value=fuente_base.cget("family"))
     selecc_tipografia = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, values=["Roboto", "Arial", "Times New Roman"], anchor="center", variable=tipo_var, command=lambda value: cambio_tipografia(value))
-    selecc_tipografia.grid(row=2, column=0, padx=5, pady=10, sticky="ew")
+    selecc_tipografia.grid(row=2, column=0, padx=2, pady=10, sticky="ew")
     
     tam_var = customtkinter.StringVar(value=fuente_base.cget("size"))
     selecc_tamaño = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, anchor="center", variable=tam_var, values=["10", "12", "14", "16", "18", "20"])
     selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value))
-    selecc_tamaño.grid(row=2, column=1, padx=5, pady=10, sticky="ew")
+    selecc_tamaño.grid(row=2, column=1, padx=2, pady=10, sticky="ew")
     
 def cambio_switch(switch):
     if (switch.get() == 0):
         customtkinter.set_appearance_mode("Light")
-        switch.configure(text="☀️")
+        # switch.configure(text="☀️")
     else:
         customtkinter.set_appearance_mode("Dark") 
-        switch.configure(text="🌙")
+        # switch.configure(text="🌙")
         
 TRADUCCIONES = {
     "Español": {
-        "idiomas": ["Español", "Inglés"],
+        "idiomas": ["Español", "Inglés", "Francés"],
         "titulo_ajustes": "Ajustes",
         "apariencia": "Apariencia",
         "etiq_origen": "Origen",
@@ -79,7 +79,7 @@ TRADUCCIONES = {
         "resultado": "Rutas óptimas"
     },
     "Inglés": {
-        "idiomas": ["Spanish", "English"],
+        "idiomas": ["Spanish", "English", "French"],
         "titulo_ajustes": "Settings",
         "apariencia": "Appearance",
         "etiq_origen": "Beginning",
@@ -89,10 +89,23 @@ TRADUCCIONES = {
         "opcion1": "Fewer transfers",
         "opcion2": "Low mobility",
         "resultado": "Optimal routes"
+    },
+    
+    "Francés": {
+        "idiomas": ["Espagnol", "Anglais", "Français"],
+        "titulo_ajustes": "Paramètres",
+        "apariencia": "Apparence",
+        "etiq_origen": "Origine",
+        "etiq_destino": "Destination",
+        "etiq_Salida": "Heure de départ (HH:MM):",
+        "etiq_Preferencias": "Préférences de voyage:",
+        "opcion1": "Moins de transferts",
+        "opcion2": "Mobilité réduite",
+        "resultado": "Itinéraires optimaux"
     }
 }
 
-IDIOMAS = ["Español", "Inglés"]
+IDIOMAS = ["Español", "Inglés", "Francés"]
 
 def cambio_idioma(ajustes, tabs, idiomaBoton, idioma_new):
     global idioma

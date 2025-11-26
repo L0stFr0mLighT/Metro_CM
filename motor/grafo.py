@@ -57,6 +57,13 @@ class Grafo:
             return None
         return cnx[1]
 
+    def heuristica(self, origen: Estacion, meta: Estacion) -> float:
+        # Calculamos la distancia entre dos puntos
+        delta_x = origen.coordenadas[0] - meta.coordenadas[0]
+        delta_y = origen.coordenadas[1] - meta.coordenadas[1]
+
+        return (delta_x ** 2 + delta_y ** 2) ** 0.5
+
     def calcular_camino_minimo(self, origen: str, dest: str) -> list[tuple[Estacion, Linea | None]] | None:
         self.destino_actual = None
 
@@ -69,7 +76,8 @@ class Grafo:
         
         try:
             self.destino_actual = est_dest
-            return astar_path(self.grafo, (est_origen, None), (est_dest, None), heuristic=None, weight=self.calcular_peso)
+            return astar_path(self.grafo, (est_origen, None), (est_dest, None), heuristic=lambda x, y : self.heuristica(x[0], y[0]), 
+                              weight=self.calcular_peso)
         except(NetworkXNoPath):
             self.destino_actual = None
             return None

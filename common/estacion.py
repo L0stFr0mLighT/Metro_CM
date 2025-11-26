@@ -7,6 +7,7 @@ class Estacion:
     """
     nombre: str
     pos_mapa: tuple[float, float]
+    coordenadas: tuple[float, float]
     # TODO: Añadir mas informacion si es necesario
 
 @dataclass(eq=True, frozen=True)
@@ -36,9 +37,6 @@ class Conexion:
 
     def simetrico(self) -> 'Conexion':
         return Conexion(self.dest, self.origen, self.linea, self.tiempo)
-
-    def set_tiempo(self, tiempo: float):
-        self.tiempo = tiempo
 
 @dataclass
 class Transbordo:

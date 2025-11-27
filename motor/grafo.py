@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from networkx import Graph, astar_path, NetworkXNoPath
+from geopy.distance import distance
 
 from common.estacion import Estacion, Linea, Conexion, Transbordo
 from motor.mapa import Mapa
@@ -60,12 +61,9 @@ class Grafo:
         return cnx[1]
 
     def heuristica(self, origen: Estacion, meta: Estacion) -> float:
-        VELOCIDAD_MEDIA = 33 * 1000 / 60 # m / min
-        # Calculamos la distancia entre dos puntos (formula de Haversine simplificada)
-        delta_x = origen.localizacion[0] - meta.localizacion[0]
-        delta_y = origen.localizacion[1] - meta.localizacion[1]
-
-        distancia = 69.1 * (((0.629 * (delta_x ** 2)) + (delta_y ** 2)) ** 0.5)
+        VELOCIDAD_MEDIA = 33 / 60 # km / min
+        # Calculamos la distancia entre dos puntos usando geopy
+        distancia = distance(origen.localizacion, meta.localizacion).km
         return distancia / VELOCIDAD_MEDIA
 
     def calcular_camino_minimo(self, origen: str, dest: str, menos_transbordos: bool) -> list[tuple[Estacion, Linea | None]] | None:

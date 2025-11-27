@@ -94,10 +94,9 @@ class Mapa:
     def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
                                          step: float) -> tuple[Image.Image, bool]:
         
-        FACTOR_ESCALA = 2
-        COLOR_REC = (185.0 / 255, 122.0 / 255, 87.0 / 255)
-        # TODO
-        surface = ImageSurface(FORMAT_ARGB32, FACTOR_ESCALA * res_x, FACTOR_ESCALA * res_y)
+        FACTOR_ESCALA = 1.25
+        COLOR_REC = (255 / 255, 0 / 255, 0 / 255)
+        surface = ImageSurface(FORMAT_ARGB32, int(FACTOR_ESCALA * res_x), int(FACTOR_ESCALA * res_y))
         ctx = Context(surface)
         ctx.scale(float(FACTOR_ESCALA * res_x), float(FACTOR_ESCALA * res_y))
 

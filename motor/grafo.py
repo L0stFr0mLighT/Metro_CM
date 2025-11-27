@@ -58,11 +58,13 @@ class Grafo:
         return cnx[1]
 
     def heuristica(self, origen: Estacion, meta: Estacion) -> float:
-        # Calculamos la distancia entre dos puntos
-        delta_x = origen.coordenadas[0] - meta.coordenadas[0]
-        delta_y = origen.coordenadas[1] - meta.coordenadas[1]
+        VELOCIDAD_MEDIA = 33 * 1000 / 60 # m / min
+        # Calculamos la distancia entre dos puntos (formula de Haversine simplificada)
+        delta_x = origen.longitud - meta.longitud
+        delta_y = origen.latitud - meta.latitud
 
-        return (delta_x ** 2 + delta_y ** 2) ** 0.5
+        distancia = 69.1 * (((0.629 * (delta_x ** 2)) + (delta_y ** 2)) ** 0.5)
+        return distancia / VELOCIDAD_MEDIA
 
     def calcular_camino_minimo(self, origen: str, dest: str) -> list[tuple[Estacion, Linea | None]] | None:
         self.destino_actual = None

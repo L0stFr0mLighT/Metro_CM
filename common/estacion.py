@@ -7,7 +7,8 @@ class Estacion:
     """
     nombre: str
     pos_mapa: tuple[float, float]
-    coordenadas: tuple[float, float]
+    latitud: float
+    longitud: float
     # TODO: Añadir mas informacion si es necesario
 
 @dataclass(eq=True, frozen=True)

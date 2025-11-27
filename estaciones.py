@@ -53,13 +53,13 @@ l_12 = Linea.crear_linea(12, (est_mixcoac, est_eje_central), (168, 140, 38))
 l_3 = Linea.crear_linea(3, (est_universidad, est_juarez), (141, 137, 38))
 
 # Transbordos
-tacubaya_l7_l1 = Transbordo(est_tacubaya, l_7, l_1, 0)
-tacubaya_l7_l9 = Transbordo(est_tacubaya, l_7, l_9, 0)
-tacubaya_l9_l1 = Transbordo(est_tacubaya, l_9, l_1, 0)
-mixcoac_l7_l12 = Transbordo(est_mixcoac, l_7, l_12, 0)
-balderas_l3_l1 = Transbordo(est_balderas, l_3, l_1, 0)
-centro_medico_l9_l3 = Transbordo(est_centro_medico, l_9, l_3, 0)
-zapata_l12_l3 = Transbordo(est_zapata, l_12, l_3, 0)
+tacubaya_l7_l1 = Transbordo(est_tacubaya, l_7, l_1, 3)
+tacubaya_l7_l9 = Transbordo(est_tacubaya, l_7, l_9, 4)
+tacubaya_l9_l1 = Transbordo(est_tacubaya, l_9, l_1, 5)
+mixcoac_l7_l12 = Transbordo(est_mixcoac, l_7, l_12, 4)
+balderas_l3_l1 = Transbordo(est_balderas, l_3, l_1, 2)
+centro_medico_l9_l3 = Transbordo(est_centro_medico, l_9, l_3, 4)
+zapata_l12_l3 = Transbordo(est_zapata, l_12, l_3, 2.5)
 
 # Vecinos L7
 polanco_auditorio = Conexion(est_polanco, est_auditorio, l_7, 2)

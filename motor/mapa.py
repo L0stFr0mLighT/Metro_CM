@@ -132,6 +132,13 @@ class Mapa:
             ctx.set_source_rgba(0, 0, 0)
             ctx.stroke()
 
+            label = estacion.nombre        # Dibuja el nombre de la estación
+            ctx.set_source_rgba(0, 0, 0)   # Color
+            ctx.set_font_size(0.02)        # Tamaño
+            ctx.move_to(estacion.pos_mapa[0] - 0.05, estacion.pos_mapa[1] - 0.01)
+            ctx.show_text(label)
+            ctx.stroke()
+
         # Por cada estacion del recorrido, vamos dibujandolo
         for i in range(len(recorrido) - 1):
             if step == 0: break

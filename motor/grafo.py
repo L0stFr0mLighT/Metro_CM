@@ -60,8 +60,8 @@ class Grafo:
     def heuristica(self, origen: Estacion, meta: Estacion) -> float:
         VELOCIDAD_MEDIA = 33 * 1000 / 60 # m / min
         # Calculamos la distancia entre dos puntos (formula de Haversine simplificada)
-        delta_x = origen.longitud - meta.longitud
-        delta_y = origen.latitud - meta.latitud
+        delta_x = origen.localizacion[0] - meta.localizacion[0]
+        delta_y = origen.localizacion[1] - meta.localizacion[1]
 
         distancia = 69.1 * (((0.629 * (delta_x ** 2)) + (delta_y ** 2)) ** 0.5)
         return distancia / VELOCIDAD_MEDIA

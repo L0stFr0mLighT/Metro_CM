@@ -87,15 +87,17 @@ class Mapa:
         return v2
 
     def dibujar_estaciones(self, res_x: int, res_y: int) -> Image.Image:
-        return self.dibujar_estaciones_con_recorrido(res_x, res_y, [])
+        return self.dibujar_estaciones_con_recorrido(res_x, res_y, [], step=0)[0]
     
-    def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion]) -> Image.Image:
-        FACTOR = 2
+    def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
+                                         step: float) -> tuple[Image.Image, bool]:
+        
+        FACTOR_ESCALA = 2
         COLOR_REC = (185.0 / 255, 122.0 / 255, 87.0 / 255)
         # TODO
-        surface = ImageSurface(FORMAT_ARGB32, FACTOR * res_x, FACTOR * res_y)
+        surface = ImageSurface(FORMAT_ARGB32, FACTOR_ESCALA * res_x, FACTOR_ESCALA * res_y)
         ctx = Context(surface)
-        ctx.scale(float(FACTOR * res_x), float(FACTOR * res_y))
+        ctx.scale(float(FACTOR_ESCALA * res_x), float(FACTOR_ESCALA * res_y))
 
         for linea in self.lineas:
             visitados = set()
@@ -106,13 +108,7 @@ class Mapa:
                 x0, y0 = estacion_actual.pos_mapa[0], estacion_actual.pos_mapa[1]
                 estacion_siguiente = self.seleccionar_siguiente_estacion(linea, estacion_actual, visitados) 
                 # Dibujar recta
-                enRecorrido = False
-                if estacion_actual in recorrido and estacion_siguiente in recorrido:
-                    if recorrido.index(estacion_actual) - recorrido.index(estacion_siguiente) in set([-1, 1]):
-                        ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
-                        enRecorrido = True
-                if not enRecorrido:
-                    ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
+                ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
                 
                 x1, y1 = estacion_siguiente.pos_mapa[0], estacion_siguiente.pos_mapa[1]
                 ctx.set_line_width(0.01)
@@ -126,17 +122,43 @@ class Mapa:
             pass
 
         for estacion in self.estaciones.values():
-                ctx.set_line_width(0.005)
-                ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-                ctx.close_path()
-                ctx.set_source_rgba(1, 1, 1)
-                ctx.fill()
-                ctx.set_line_width(0.003)
-                ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-                ctx.set_source_rgba(0, 0, 0)
+            ctx.set_line_width(0.005)
+            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            ctx.close_path()
+            ctx.set_source_rgba(1, 1, 1)
+            ctx.fill()
+            ctx.set_line_width(0.003)
+            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            ctx.set_source_rgba(0, 0, 0)
+            ctx.stroke()
+
+        # Por cada estacion del recorrido, vamos dibujandolo
+        for i in range(len(recorrido) - 1):
+            if step == 0: break
+            par_estaciones = recorrido[i:i+2]
+            v1 = par_estaciones[0].pos_mapa
+            v2 = par_estaciones[1].pos_mapa
+            if i < step and step <= i + 1:
+                # Calculamos vector director
+                director = (v2[0] - v1[0], v2[1] - v1[1])
+                director_pintado = ((step - i) * director[0], (step - i) * director[1])
+                pos_final_pintado = (v1[0] + director_pintado[0], v1[1] + director_pintado[1])
+                # Pintamos la parte proporcional
+                ctx.set_line_width(0.01)
+                ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
+                ctx.move_to(v1[0], v1[1])
+                ctx.line_to(pos_final_pintado[0], pos_final_pintado[1])
                 ctx.stroke()
+                break
+            # El trozo actual debe estar completamente pintado
+            ctx.set_line_width(0.01)
+            ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
+            ctx.move_to(v1[0], v1[1])
+            ctx.line_to(v2[0], v2[1])
+            ctx.stroke()
 
         surface.write_to_png("prueba.png")
         imagen = to_pil(surface)
-        return imagen
+        # Falta recorrido por pintar si step < len(recorrido) - 1
+        return (imagen, step < (len(recorrido) - 1))
     

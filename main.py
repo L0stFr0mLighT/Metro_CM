@@ -60,10 +60,10 @@ def abrir_ajustes():
 def cambio_switch(switch):
     if (switch.get() == 0):
         customtkinter.set_appearance_mode("Light")
-        # switch.configure(text="☀️")
+        switch.configure(text="☀️")
     else:
         customtkinter.set_appearance_mode("Dark") 
-        # switch.configure(text="🌙")
+        switch.configure(text="🌙")
         
 TRADUCCIONES = {
     "Español": {
@@ -90,7 +90,6 @@ TRADUCCIONES = {
         "opcion2": "Low mobility",
         "resultado": "Optimal routes"
     },
-    
     "Francés": {
         "idiomas": ["Espagnol", "Anglais", "Français"],
         "titulo_ajustes": "Paramètres",
@@ -243,7 +242,6 @@ frameTexto.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 # -------------------------
 # Frame origen y destino
 # -------------------------
-# TODO: Una esquina no redondeada por la puta cara
 frameOrigen_Destino = customtkinter.CTkFrame(frameTexto, fg_color= "transparent", corner_radius=6)
 frameOrigen_Destino.grid_columnconfigure((0,1), weight=1)
 frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", columnspan= 2, pady=10, padx=1)

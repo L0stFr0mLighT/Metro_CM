@@ -135,6 +135,13 @@ class Mapa:
                 ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
                 ctx.set_source_rgba(0, 0, 0)
                 ctx.stroke()
+                
+                label = estacion.nombre        # Dibuja el nombre de la estación
+                ctx.set_source_rgba(0, 0, 0)   # Color
+                ctx.set_font_size(0.02)        # Tamaño
+                ctx.move_to(estacion.pos_mapa[0] - 0.05, estacion.pos_mapa[1] - 0.01)
+                ctx.show_text(label)
+                ctx.stroke()
 
         surface.write_to_png("prueba.png")
         imagen = to_pil(surface)

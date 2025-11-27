@@ -19,10 +19,11 @@ class Grafo:
     grafo: Graph = Graph()
     mapa: Mapa = field(default_factory=lambda : Mapa())
 
+    # Estado temporal
     destino_actual: Estacion | None = None
+    menos_transbordos: bool = False
 
     def set_grafo(self, conexiones: list[Conexion], transbordos: list[Transbordo], mapa: Mapa):
-        # TODO: Añadir mas datos aqui
         self.mapa = mapa
         for conexion in conexiones:
             # Añado las estaciones "generales"
@@ -36,6 +37,7 @@ class Grafo:
             self.grafo.add_edge((transbordo.estacion, transbordo.linea1), (transbordo.estacion, transbordo.linea2))
 
     def calcular_peso(self, cnx_origen: tuple[Estacion, Linea | None], cnx_dest: tuple[Estacion, Linea | None], _attr) -> float | None:
+        M = 100 # Valor grande
         if cnx_origen[1] == None:
             return 0
         
@@ -49,7 +51,7 @@ class Grafo:
             if transb == None:
                 print("ERROR: La clase Mapa no ha encontrado el transbordo !!")
                 return None
-            return transb.tiempo_trasbordo
+            return transb.tiempo_trasbordo + M if self.menos_transbordos else transb.tiempo_trasbordo
 
         cnx = self.mapa.buscar_conexion(cnx_origen[0], cnx_dest[0])
         if cnx == None:
@@ -58,14 +60,17 @@ class Grafo:
         return cnx[1]
 
     def heuristica(self, origen: Estacion, meta: Estacion) -> float:
-        # Calculamos la distancia entre dos puntos
-        delta_x = origen.coordenadas[0] - meta.coordenadas[0]
-        delta_y = origen.coordenadas[1] - meta.coordenadas[1]
+        VELOCIDAD_MEDIA = 33 * 1000 / 60 # m / min
+        # Calculamos la distancia entre dos puntos (formula de Haversine simplificada)
+        delta_x = origen.localizacion[0] - meta.localizacion[0]
+        delta_y = origen.localizacion[1] - meta.localizacion[1]
 
-        return (delta_x ** 2 + delta_y ** 2) ** 0.5
+        distancia = 69.1 * (((0.629 * (delta_x ** 2)) + (delta_y ** 2)) ** 0.5)
+        return distancia / VELOCIDAD_MEDIA
 
-    def calcular_camino_minimo(self, origen: str, dest: str) -> list[tuple[Estacion, Linea | None]] | None:
+    def calcular_camino_minimo(self, origen: str, dest: str, menos_transbordos: bool) -> list[tuple[Estacion, Linea | None]] | None:
         self.destino_actual = None
+        self.menos_transbordos = menos_transbordos
 
         est_origen = self.mapa.buscar_por_nombre(origen)
         if est_origen == None:
@@ -76,8 +81,12 @@ class Grafo:
         
         try:
             self.destino_actual = est_dest
-            return astar_path(self.grafo, (est_origen, None), (est_dest, None), heuristic=lambda x, y : self.heuristica(x[0], y[0]), 
+            res = astar_path(self.grafo, (est_origen, None), (est_dest, None), heuristic=lambda x, y : self.heuristica(x[0], y[0]), 
                               weight=self.calcular_peso)
+            self.destino_actual = None
+            self.menos_transbordos = False
+            return res
         except(NetworkXNoPath):
             self.destino_actual = None
+            self.menos_transbordos = False
             return None

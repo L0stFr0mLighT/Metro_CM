@@ -128,11 +128,13 @@ def cambio_idioma(ajustes, tabs, idiomaBoton, idioma_new):
     
 # TODO
 def cambio_tipografia(tipografia):
-    print(f"Cambio de tipografía a: {tipografia}")
+    fuente_base.configure(family=tipografia)
+    fuente_subtitulo.configure(family=tipografia)
 
 # TODO
 def cambio_tamaño_tipografia(tamaño):
-    print(f"Cambio de tamaño de tipografía a: {tamaño}")
+    fuente_base.configure( size=int(tamaño))
+    fuente_subtitulo.configure(size=int(tamaño)+15)
 
 # TODO
 def buscar_rutas():
@@ -215,7 +217,7 @@ ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_columnconfigure(1, weight=1)
 ventana.grid_rowconfigure(0, weight=1)
 
-fuente_base = customtkinter.CTkFont(family="Roboto", size=16) # Fuente base para los textos
+fuente_base = customtkinter.CTkFont(family="Roboto", size=15) # Fuente base para los textos
 # TODO: completar fuente_titulo
 fuente_titulo = customtkinter.CTkFont()
 fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30)

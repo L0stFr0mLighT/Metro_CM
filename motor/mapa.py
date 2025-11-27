@@ -121,24 +121,6 @@ class Mapa:
                 pass
             pass
 
-        for estacion in self.estaciones.values():
-            ctx.set_line_width(0.005)
-            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-            ctx.close_path()
-            ctx.set_source_rgba(1, 1, 1)
-            ctx.fill()
-            ctx.set_line_width(0.003)
-            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-            ctx.set_source_rgba(0, 0, 0)
-            ctx.stroke()
-
-            label = estacion.nombre        # Dibuja el nombre de la estación
-            ctx.set_source_rgba(0, 0, 0)   # Color
-            ctx.set_font_size(0.02)        # Tamaño
-            ctx.move_to(estacion.pos_mapa[0] - 0.05, estacion.pos_mapa[1] - 0.01)
-            ctx.show_text(label)
-            ctx.stroke()
-
         # Por cada estacion del recorrido, vamos dibujandolo
         for i in range(len(recorrido) - 1):
             if step == 0: break
@@ -162,6 +144,24 @@ class Mapa:
             ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
             ctx.move_to(v1[0], v1[1])
             ctx.line_to(v2[0], v2[1])
+            ctx.stroke()
+
+        for estacion in self.estaciones.values():
+            ctx.set_line_width(0.005)
+            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            ctx.close_path()
+            ctx.set_source_rgba(1, 1, 1)
+            ctx.fill()
+            ctx.set_line_width(0.003)
+            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            ctx.set_source_rgba(0, 0, 0)
+            ctx.stroke()
+
+            label = estacion.nombre        # Dibuja el nombre de la estación
+            ctx.set_source_rgba(0, 0, 0)   # Color
+            ctx.set_font_size(0.02)        # Tamaño
+            ctx.move_to(estacion.pos_mapa[0] - 0.05, estacion.pos_mapa[1] - 0.01)
+            ctx.show_text(label)
             ctx.stroke()
 
         surface.write_to_png("prueba.png")

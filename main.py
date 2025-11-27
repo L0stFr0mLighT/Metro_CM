@@ -333,7 +333,7 @@ etiqResultado.grid(row=0, column=0, pady = (20,0))
 # -----------------------------
 # Frame principal derecho (mapa)
 # -----------------------------
-frameMapa = customtkinter.CTkFrame(ventana, fg_color="yellow")
+frameMapa = customtkinter.CTkFrame(ventana, fg_color="white")
 frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
 frameMapa.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)

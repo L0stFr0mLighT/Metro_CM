@@ -158,11 +158,10 @@ class Mapa:
             ctx.stroke()
 
             label = estacion.nombre        # Dibuja el nombre de la estación
-            ctx.set_source_rgba(0, 0, 0)   # Color
+            ctx.set_source_rgba(estacion.color[0]/255,estacion.color[1]/255, estacion.color[2]/255)   # Color
             ctx.set_font_size(0.02)        # Tamaño
-            ctx.move_to(estacion.pos_mapa[0] - 0.05, estacion.pos_mapa[1] - 0.01)
+            ctx.move_to(estacion.pos_nombre[0], estacion.pos_nombre[1]) # Posición
             ctx.show_text(label)
-            ctx.stroke()
 
         surface.write_to_png("prueba.png")
         imagen = to_pil(surface)

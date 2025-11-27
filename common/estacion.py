@@ -8,6 +8,8 @@ class Estacion:
     nombre: str
     pos_mapa: tuple[float, float]
     localizacion: tuple[float, float]
+    pos_nombre: tuple[float, float]
+    color: tuple[float, float, float] = (0.0, 0.0, 0.0)
     # TODO: Añadir mas informacion si es necesario
 
 @dataclass(eq=True, frozen=True)

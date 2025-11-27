@@ -46,12 +46,11 @@ est_copilco = Estacion("Copilco", (float(379 / 536), float(495 / 603)), localiza
 est_universidad = Estacion("Universidad", (float(379 / 536), float(529 / 603)), localizacion=(19.32440723326762, -99.173907446492), pos_nombre=(float(388/536),float(529/603)), color=(141, 137, 38))
 
 # Lineas y Cabeceras
-l_7 = Linea.crear_linea(7, (est_barranca, est_polanco), (229, 129, 38))
-l_9 = Linea.crear_linea(9, (est_tacubaya, est_lazaro), (119, 66, 52))
-l_1 = Linea.crear_linea(1, (est_observatorio, est_balderas), (194, 60, 127))
-l_12 = Linea.crear_linea(12, (est_mixcoac, est_eje_central), (168, 140, 38))
-l_3 = Linea.crear_linea(3, (est_universidad, est_juarez), (141, 137, 38))
-
+l_7 = Linea.crear_linea(7, (est_barranca, est_polanco), (229, 129, 38), pos_cuadrado=(float(139/536), float(426/603)))
+l_9 = Linea.crear_linea(9, (est_tacubaya, est_lazaro), (119, 66, 52), pos_cuadrado=(float(117/536), float(175/603)))
+l_1 = Linea.crear_linea(1, (est_observatorio, est_balderas), (194, 60, 127), pos_cuadrado=(float(73/536), float(230/603)))
+l_12 = Linea.crear_linea(12, (est_mixcoac, est_eje_central), (168, 140, 38), pos_cuadrado=(float(112/536), float(365/603)))
+l_3 = Linea.crear_linea(3, (est_universidad, est_juarez), (141, 137, 38), pos_cuadrado=(float(365/536), float(538/603)))
 # Transbordos
 tacubaya_l7_l1 = Transbordo(est_tacubaya, l_7, l_1, 3)
 tacubaya_l7_l9 = Transbordo(est_tacubaya, l_7, l_9, 4)

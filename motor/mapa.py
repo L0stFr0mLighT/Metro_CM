@@ -106,12 +106,12 @@ class Mapa:
             estacion_actual = linea.cabeceras[0]
             
             lado = 0.05
-            roundRect.roundrect(ctx, estacion_actual.pos_mapa[0] - 0.075, estacion_actual.pos_mapa[1] - 0.02, lado, lado, 0.01)
+            roundRect.roundrect(ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
             ctx.close_path()
             ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
             ctx.fill()
             ctx.set_line_width(0.002)
-            roundRect.roundrect(ctx, estacion_actual.pos_mapa[0] - 0.075, estacion_actual.pos_mapa[1] - 0.02, lado, lado, 0.01)
+            roundRect.roundrect(ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
             ctx.set_source_rgba(0, 0, 0)
             ctx.stroke()
             
@@ -120,8 +120,8 @@ class Mapa:
             ctx.select_font_face("Arial", 0, cairo.FONT_WEIGHT_BOLD)
             ctx.set_font_size(0.03)
             te = ctx.text_extents(str(linea.numero))
-            x_centro = estacion_actual.pos_mapa[0] - 0.075 + (lado - te.width) / 2 - te.x_bearing
-            y_centro = estacion_actual.pos_mapa[1] - 0.02 + (lado - te.height) / 2 - te.y_bearing
+            x_centro = linea.pos_cuadrado[0] + (lado - te.width) / 2 - te.x_bearing
+            y_centro = linea.pos_cuadrado[1] + (lado - te.height) / 2 - te.y_bearing
             ctx.move_to(x_centro, y_centro)
             ctx.show_text(str(linea.numero))
             ctx.stroke()

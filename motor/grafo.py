@@ -110,3 +110,17 @@ class Grafo:
             res += 0 if coste == None else coste
         
         return res
+    
+    def estaciones_principales(self, camino: list[tuple[Estacion, Linea | None]]) -> list[tuple[Estacion, Linea | None]]:
+        """
+        Devuelve las estaciones principales del recorrido. Es decir, las estaciones origen y destino;
+        asi como los transbordos
+        """
+        res = list()
+
+        for i in range(len(camino) - 1):
+            if camino[i][1] != camino[i+1][1]:
+                res.append(camino[i])
+                res.append(camino[i+1])
+
+        return res

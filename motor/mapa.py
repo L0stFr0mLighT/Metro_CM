@@ -189,10 +189,9 @@ class Mapa:
             v1 = par_estaciones[0].pos_mapa
             v2 = par_estaciones[1].pos_mapa
             if i < step and step <= i + 1:
-                LONG_MARCADOR = 0.05
                 # Calculamos vector director
                 director = (v2[0] - v1[0], v2[1] - v1[1])
-                director_pintado = ((step - i - LONG_MARCADOR) * director[0], (step - i - LONG_MARCADOR) * director[1])
+                director_pintado = ((step - i) * director[0], (step - i) * director[1])
                 pos_final_pintado = (v1[0] + director_pintado[0], v1[1] + director_pintado[1])
                 # Pintamos la parte proporcional
                 self._ctx.set_line_width(0.01)
@@ -200,6 +199,7 @@ class Mapa:
                 self._ctx.move_to(v1[0], v1[1])
                 self._ctx.line_to(pos_final_pintado[0], pos_final_pintado[1])
                 self._ctx.stroke()
+                # Dibujamos al tren como un punto
                 self._ctx.set_source_rgba(0, 0, 0)
                 self._ctx.arc(pos_final_pintado[0], pos_final_pintado[1], 0.005, 0.0, 2.0 * math.pi)
                 self._ctx.close_path()
@@ -226,6 +226,13 @@ class Mapa:
             if i < step and step <= i + 1:
                 break
 
+        # Si estamos en el paso final, dibujamos el punto del tren encima de la estacion
+        if len(recorrido) > 0 and step >= len(recorrido) - 1:
+            self._ctx.set_source_rgba(0, 0, 0)
+            self._ctx.arc(recorrido[-1].pos_mapa[0], recorrido[-1].pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            self._ctx.close_path()
+            self._ctx.fill()
+        
         self._mapa_actual.write_to_png("prueba.png")
         imagen = to_pil(self._mapa_actual)
         # Falta recorrido por pintar si step < len(recorrido) - 1

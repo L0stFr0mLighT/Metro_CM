@@ -147,6 +147,8 @@ def cambio_tamaño_tipografia(tamaño):
 
 # TODO
 def buscar_rutas():
+    mapa.dibujar_estaciones(700, 700)
+
     origen_text = origen.get()
     destino_text = destino.get()
     menos_trasbordos = opcion1.get()
@@ -163,6 +165,20 @@ def buscar_rutas():
     
     hora_estimada = sumar_minutos(hora_salida, min_salida, tiempo_camino)
     print("WARN: Hora estimada: {}".format(hora_estimada))
+
+    # Animar el mapa
+    caminos_principales = list(dict.fromkeys(map(lambda x : x[0], camino)))
+    animar(0, caminos_principales)
+
+def animar(step: float, camino: list[Estacion]):
+    global mapaLabel, ventana
+    PASO = 0.75
+    PERIODO = int(float(1 / 60) * 1000)
+    # TODO: Cte simbolica
+    (nuevo_mapa, continuar) = mapa.dibujar_estaciones_con_recorrido(700, 700, camino, step)
+    mapaLabel.configure(image=customtkinter.CTkImage(nuevo_mapa, size=(700, 700)))
+    if continuar:
+        ventana.after(PERIODO, lambda : animar(step + PASO, camino))
 
 # Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):

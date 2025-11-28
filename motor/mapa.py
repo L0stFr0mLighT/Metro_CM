@@ -7,6 +7,8 @@ from PIL import Image
 import math
 import cairo
 
+FACTOR_ESCALA = 1.25
+
 def to_pil(surface: ImageSurface) -> Image.Image:
     size = (surface.get_width(), surface.get_height())
     stride = surface.get_stride()
@@ -24,6 +26,9 @@ class Mapa:
         = field(default_factory=dict)
     conexion: dict[tuple[Estacion, Estacion], tuple[Linea, float]] = field(default_factory=dict)
     transbordos: list[Transbordo] = field(default_factory=list)
+    
+    _mapa_actual: ImageSurface | None = field(default_factory=lambda : None)
+    _ctx: Context | None = field(default_factory=lambda : None)
 
     def set_mapa(self, estaciones: list[Estacion], lineas: list[Linea], conexiones: list[Conexion], transbordos: list[Transbordo]):
         # Formar la lista de transbordos
@@ -89,41 +94,45 @@ class Mapa:
         return v2
 
     def dibujar_estaciones(self, res_x: int, res_y: int) -> Image.Image:
+        """
+        Dibuja el mapa desde cero
+        """
+        self._mapa_actual = None
+        self._ctx = None
         return self.dibujar_estaciones_con_recorrido(res_x, res_y, [], step=0)[0]
     
-    def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
-                                         step: float) -> tuple[Image.Image, bool]:
-        
-        FACTOR_ESCALA = 1.25
-        COLOR_REC = (255 / 255, 0 / 255, 0 / 255)
-        surface = ImageSurface(FORMAT_ARGB32, int(FACTOR_ESCALA * res_x), int(FACTOR_ESCALA * res_y))
-        ctx = Context(surface)
-        ctx.scale(float(FACTOR_ESCALA * res_x), float(FACTOR_ESCALA * res_y))
+    def _dibujar_mapa_inicial(self, res_x: int, res_y: int):
+        """
+        Pinta el mapa inicial, inicializando la superficie de imagen
+        """
+        self._mapa_actual = ImageSurface(FORMAT_ARGB32, int(FACTOR_ESCALA * res_x), int(FACTOR_ESCALA * res_y))
+        self._ctx = Context(self._mapa_actual)
+        self._ctx.scale(float(FACTOR_ESCALA * res_x), float(FACTOR_ESCALA * res_y))
 
         for linea in self.lineas:
             visitados = set()
             estacion_actual = linea.cabeceras[0]
             
             lado = 0.05
-            roundRect.roundrect(ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
-            ctx.close_path()
-            ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
-            ctx.fill()
-            ctx.set_line_width(0.002)
-            roundRect.roundrect(ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
-            ctx.set_source_rgba(0, 0, 0)
-            ctx.stroke()
+            roundRect.roundrect(self._ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
+            self._ctx.close_path()
+            self._ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
+            self._ctx.fill()
+            self._ctx.set_line_width(0.002)
+            roundRect.roundrect(self._ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
+            self._ctx.set_source_rgba(0, 0, 0)
+            self._ctx.stroke()
             
             # Dibujar número centrado
-            ctx.set_source_rgba(1, 1, 1)
-            ctx.select_font_face("Arial", 0, cairo.FONT_WEIGHT_BOLD)
-            ctx.set_font_size(0.03)
-            te = ctx.text_extents(str(linea.numero))
+            self._ctx.set_source_rgba(1, 1, 1)
+            self._ctx.select_font_face("Arial", 0, cairo.FONT_WEIGHT_BOLD)
+            self._ctx.set_font_size(0.03)
+            te = self._ctx.text_extents(str(linea.numero))
             x_centro = linea.pos_cuadrado[0] + (lado - te.width) / 2 - te.x_bearing
             y_centro = linea.pos_cuadrado[1] + (lado - te.height) / 2 - te.y_bearing
-            ctx.move_to(x_centro, y_centro)
-            ctx.show_text(str(linea.numero))
-            ctx.stroke()
+            self._ctx.move_to(x_centro, y_centro)
+            self._ctx.show_text(str(linea.numero))
+            self._ctx.stroke()
             
             while estacion_actual != linea.cabeceras[1]:
                 visitados.add(estacion_actual)
@@ -131,18 +140,47 @@ class Mapa:
                 x0, y0 = estacion_actual.pos_mapa[0], estacion_actual.pos_mapa[1]
                 estacion_siguiente = self.seleccionar_siguiente_estacion(linea, estacion_actual, visitados) 
                 # Dibujar recta
-                ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
+                self._ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
                 
                 x1, y1 = estacion_siguiente.pos_mapa[0], estacion_siguiente.pos_mapa[1]
-                ctx.set_line_width(0.01)
-                ctx.move_to(x0, y0)
-                ctx.line_to(x1, y1)
-                ctx.stroke()
+                self._ctx.set_line_width(0.01)
+                self._ctx.move_to(x0, y0)
+                self._ctx.line_to(x1, y1)
+                self._ctx.stroke()
 
                 estacion_actual = estacion_siguiente
                 
                 pass
             pass
+
+        for estacion in self.estaciones.values():
+            self._ctx.set_line_width(0.005)
+            self._ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            self._ctx.close_path()
+            self._ctx.set_source_rgba(1, 1, 1)
+            self._ctx.fill()
+            self._ctx.set_line_width(0.003)
+            self._ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
+            self._ctx.set_source_rgba(0, 0, 0)
+            self._ctx.stroke()
+
+            label = estacion.nombre        # Dibuja el nombre de la estación
+            self._ctx.set_source_rgba(estacion.color[0]/255,estacion.color[1]/255, estacion.color[2]/255)   # Color
+            self._ctx.set_font_size(0.02)        # Tamaño
+            self._ctx.move_to(estacion.pos_nombre[0], estacion.pos_nombre[1]) # Posición
+            self._ctx.show_text(label)
+
+    def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
+                                         step: float) -> tuple[Image.Image, bool]:
+        """
+        Dibuja el mapa con el recorrido y el paso dado. Si no se ha dibujado el mapa previamente, lo crea
+        """
+        COLOR_REC = (255 / 255, 0 / 255, 0 / 255)
+        if self._mapa_actual == None:
+            self._dibujar_mapa_inicial(res_x, res_y)
+
+        assert self._mapa_actual != None
+        assert self._ctx != None
 
         # Por cada estacion del recorrido, vamos dibujandolo
         for i in range(len(recorrido) - 1):
@@ -151,43 +189,45 @@ class Mapa:
             v1 = par_estaciones[0].pos_mapa
             v2 = par_estaciones[1].pos_mapa
             if i < step and step <= i + 1:
+                LONG_MARCADOR = 0.05
                 # Calculamos vector director
                 director = (v2[0] - v1[0], v2[1] - v1[1])
-                director_pintado = ((step - i) * director[0], (step - i) * director[1])
+                director_pintado = ((step - i - LONG_MARCADOR) * director[0], (step - i - LONG_MARCADOR) * director[1])
                 pos_final_pintado = (v1[0] + director_pintado[0], v1[1] + director_pintado[1])
                 # Pintamos la parte proporcional
-                ctx.set_line_width(0.01)
-                ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
-                ctx.move_to(v1[0], v1[1])
-                ctx.line_to(pos_final_pintado[0], pos_final_pintado[1])
-                ctx.stroke()
+                self._ctx.set_line_width(0.01)
+                self._ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
+                self._ctx.move_to(v1[0], v1[1])
+                self._ctx.line_to(pos_final_pintado[0], pos_final_pintado[1])
+                self._ctx.stroke()
+                self._ctx.set_source_rgba(0, 0, 0)
+                self._ctx.arc(pos_final_pintado[0], pos_final_pintado[1], 0.005, 0.0, 2.0 * math.pi)
+                self._ctx.close_path()
+                self._ctx.fill()
+            else:
+                # El trozo actual debe estar completamente pintado
+                self._ctx.set_line_width(0.01)
+                self._ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
+                self._ctx.move_to(v1[0], v1[1])
+                self._ctx.line_to(v2[0], v2[1])
+                self._ctx.stroke()
+            
+            # Dibujar los puntos de las estaciones
+            self._ctx.set_line_width(0.005)
+            self._ctx.arc(v1[0], v1[1], 0.005, 0.0, 2.0 * math.pi)
+            self._ctx.close_path()
+            self._ctx.set_source_rgba(1, 1, 1)
+            self._ctx.fill()
+            self._ctx.set_line_width(0.003)
+            self._ctx.arc(v1[0], v1[1], 0.005, 0.0, 2.0 * math.pi)
+            self._ctx.set_source_rgba(0, 0, 0)
+            self._ctx.stroke()
+
+            if i < step and step <= i + 1:
                 break
-            # El trozo actual debe estar completamente pintado
-            ctx.set_line_width(0.01)
-            ctx.set_source_rgba(COLOR_REC[0], COLOR_REC[1], COLOR_REC[2])
-            ctx.move_to(v1[0], v1[1])
-            ctx.line_to(v2[0], v2[1])
-            ctx.stroke()
 
-        for estacion in self.estaciones.values():
-            ctx.set_line_width(0.005)
-            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-            ctx.close_path()
-            ctx.set_source_rgba(1, 1, 1)
-            ctx.fill()
-            ctx.set_line_width(0.003)
-            ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
-            ctx.set_source_rgba(0, 0, 0)
-            ctx.stroke()
-
-            label = estacion.nombre        # Dibuja el nombre de la estación
-            ctx.set_source_rgba(estacion.color[0]/255,estacion.color[1]/255, estacion.color[2]/255)   # Color
-            ctx.set_font_size(0.02)        # Tamaño
-            ctx.move_to(estacion.pos_nombre[0], estacion.pos_nombre[1]) # Posición
-            ctx.show_text(label)
-
-        surface.write_to_png("prueba.png")
-        imagen = to_pil(surface)
+        self._mapa_actual.write_to_png("prueba.png")
+        imagen = to_pil(self._mapa_actual)
         # Falta recorrido por pintar si step < len(recorrido) - 1
         return (imagen, step < (len(recorrido) - 1))
     

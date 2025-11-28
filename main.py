@@ -29,33 +29,42 @@ def abrir_ajustes():
     tab_actual = tabs.tab(apariencia_name)
     tabs.pack(fill="both", expand=True, padx=5, pady=10)
     tabs.tab(apariencia_name).grid_columnconfigure((0,1), weight=1)
-    tabs.tab(apariencia_name).grid_rowconfigure((0,1,2), weight=1)
+    # tabs.tab(apariencia_name).grid_rowconfigure((0,1,2,3,4,5), weight=1)
     
     w_root = ventana.winfo_width()                   # Obtener tamaño y posición de la ventana principal
     h_root = ventana.winfo_height()
-    x_top = (w_root - 250) // 2                      # Calcular posición centrada
-    y_top = (h_root - 250) // 2
-    ajustes.geometry(f"{250}x{250}+{x_top}+{y_top}") 
+    x_ajustes= 250
+    y_ajustes= 300
+    x_top = (w_root - x_ajustes) // 2                      # Calcular posición centrada
+    y_top = (h_root - y_ajustes) // 2
+
+    ajustes.geometry(f"{x_ajustes}x{y_ajustes}+{x_top}+{y_top}") 
     
     modo = True if customtkinter.get_appearance_mode() == "Dark" else False
     switch_var = customtkinter.BooleanVar(value=modo) 
     texto = "🌙" if modo else "☀️"
     modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuente_base)
-    modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse", columnspan=2)
+    modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
+    
+    labelIdioma = customtkinter.CTkLabel(tab_actual, text="Idioma:", font=fuente_base)
+    labelIdioma.grid(row=1, column=0, padx=2, pady=1, sticky="w")
     
     idioma_var = customtkinter.StringVar(value=TRADUCCIONES[idioma]["idiomas"][IDIOMAS.index(idioma)])
     idiomaBoton = customtkinter.CTkSegmentedButton(tab_actual, values=TRADUCCIONES[idioma]["idiomas"], font=fuente_base, variable=idioma_var) # Francés?
     idiomaBoton.configure(command=lambda value: cambio_idioma(ajustes, tabs, idiomaBoton, idiomaBoton.cget("values").index(idiomaBoton.get())))
-    idiomaBoton.grid(row=1, column=0, padx=2, pady=10, sticky="ew",columnspan=2)
+    idiomaBoton.grid(row=2, column=0, padx=2, pady=(0,20), sticky="ew")
+    
+    labelFormato = customtkinter.CTkLabel(tab_actual, text="Formato de letra:", font=fuente_base)
+    labelFormato.grid(row=3, column=0, padx=2, pady=1, sticky="w")
     
     tipo_var = customtkinter.StringVar(value=fuente_base.cget("family"))
     selecc_tipografia = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, values=["Roboto", "Arial", "Times New Roman"], anchor="center", variable=tipo_var, command=lambda value: cambio_tipografia(value))
-    selecc_tipografia.grid(row=2, column=0, padx=2, pady=10, sticky="ew")
+    selecc_tipografia.grid(row=4, column=0, padx=2, pady=(0,10), sticky="ew")
     
     tam_var = customtkinter.StringVar(value=fuente_base.cget("size"))
     selecc_tamaño = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, anchor="center", variable=tam_var, values=["10", "12", "14", "16", "18", "20"])
     selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value))
-    selecc_tamaño.grid(row=2, column=1, padx=2, pady=10, sticky="ew")
+    selecc_tamaño.grid(row=5, column=0, padx=2, pady=(0,10), sticky="ew")
     
 def cambio_switch(switch):
     if (switch.get() == 0):
@@ -208,22 +217,39 @@ def min_button_callback(entry_hora, entry_min, paso):
 # Frame principal
 # -----------------
 ventana = customtkinter.CTk()
-ventana.geometry("1400x750+0+0") 
+
+ventana.geometry("{0}x{1}+0+0".format(ventana.winfo_screenwidth(), ventana.winfo_screenheight()))
+# ventana.geometry("1920x1080+0+0") 
 #ventana.after(0, lambda: ventana.state("zoomed")) # solo funciona en Windows
 ventana.iconbitmap('Imagenes/Logo_metro.ico')
 ventana.title("Metro Ciudad de Mexico")
 ventana.minsize(1400,750)
 ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_columnconfigure(1, weight=1)
-ventana.grid_rowconfigure(0, weight=1)
+# ventana.grid_rowconfigure(0, weight=1)
 
-fuente_base = customtkinter.CTkFont(family="Roboto", size=15) # Fuente base para los textos
-# TODO: completar fuente_titulo
-fuente_titulo = customtkinter.CTkFont()
-fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30)
-
+fuente_base = customtkinter.CTkFont(family="Roboto", size=15, weight="normal") # Fuente base para los textos
+fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30, weight="normal")
+fuente_titulo = customtkinter.CTkFont(family="Georgia", size= 40, weight="bold")
 estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
 estaciones_names.sort() # Ordena las estaciones alfabeticamente
+
+# ------------------------
+# Frame Titulo (texto)
+# ------------------------
+frameTitulo = customtkinter.CTkFrame(ventana, fg_color=("white", "grey10"))
+frameTitulo.grid(row=0, column=0, columnspan =2, sticky="ew", padx = 20, pady = 20)
+frameTitulo.grid_columnconfigure(2, weight=1)
+
+imagenLogo = customtkinter.CTkImage(light_image=Image.open('Imagenes/Logo_metro.ico').resize((40,40)), dark_image=Image.open('Imagenes/Logo_metro.ico').resize((40,40)), size=(40,40))
+labelLogo = customtkinter.CTkLabel(frameTitulo,image=imagenLogo, text="")
+labelLogo.grid(row=0, column=0, padx = 20)
+labelTitulo = customtkinter.CTkLabel(frameTitulo, text= "Metro Ciudad de México", font= fuente_titulo)
+labelTitulo.grid(row=0,column=1)
+
+ajustes_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25)) # Botón ajustes
+botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
+botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
 # ------------------------
 # Frame izquierdo (texto)
@@ -231,19 +257,11 @@ estaciones_names.sort() # Ordena las estaciones alfabeticamente
 frameTexto = customtkinter.CTkFrame(ventana, fg_color=("grey80", "grey19")) # TODO:Color Provisional 
 frameTexto.grid_columnconfigure((0,1), weight=1)
 frameTexto.grid_rowconfigure(3, weight=1)
-frameTexto.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
 
-# --------------------------------------------------
-# # Frame borde (contiene todos los frames interiores)
-# # --------------------------------------------------
-# frameBorde = customtkinter.CTkFrame(frameTexto, fg_color="grey", corner_radius=0)
-# frameBorde.grid_columnconfigure(0, weight=1)
-# frameBorde.grid_rowconfigure(3, weight=1) # Para que el frame resultado crezca hasta el final
-# frameBorde.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-
-# -------------------------
-# Frame origen y destino
-# -------------------------
+    # -------------------------
+    # Frame origen y destino
+    # -------------------------
 frameOrigen_Destino = customtkinter.CTkFrame(frameTexto, fg_color= "transparent", corner_radius=6)
 frameOrigen_Destino.grid_columnconfigure((0,1), weight=1)
 frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", columnspan= 2, pady=10, padx=1)
@@ -254,13 +272,13 @@ etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino", font=f
 etiqDestino.grid(row=0, column=1, padx=(0,18), sticky="ew")  
 
 # TODO: No cambiar tamaño al cambiar la opcion. Mirar con combo box o scrollable frame + radio buttons
-origen = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center")
+origen = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
 CTkScrollableDropdown(origen, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
 # TODO: a lo mejor queda mejor con:
 # origen.grid(row=1, column=0, padx= 10, sticky="ew")
 origen.grid(row=1, column=0)
 
-destino = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center")
+destino = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
 CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
 # TODO: a lo mejor queda mejor con:
 # destino.grid(row=1, column=1, padx= 10, sticky="ew")
@@ -270,13 +288,10 @@ lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png")
 botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
 
-ajustes_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25)) # Botón ajustes
-botonAjustes = customtkinter.CTkButton(ventana, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
-botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="ne")
 
-# -------------------
-# Frame entrada hora
-# -------------------
+    # -------------------
+    # Frame entrada hora
+    # -------------------
 frameEntryTiempo = customtkinter.CTkFrame(frameTexto, fg_color= "transparent")
 frameEntryTiempo.grid_columnconfigure((0,2), weight=1)
 frameEntryTiempo.grid(row=1, column=0, sticky="wns", pady=10, padx=1)
@@ -308,9 +323,9 @@ minuto = customtkinter.CTkEntry(frameEntryTiempo,width=50, height=20, textvariab
 minuto.grid(row=2, column=2, sticky="w", padx=5)
 entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 
-# --------------------
-# Frame Preferencias
-# --------------------
+    # --------------------
+    # Frame Preferencias
+    # --------------------
 framePreferencias = customtkinter.CTkFrame(frameTexto, fg_color="transparent")
 framePreferencias.grid_columnconfigure(0, weight=1)
 framePreferencias.grid(row=1, column=1, sticky="nsew", pady=10, padx=1)
@@ -322,26 +337,27 @@ opcion1.grid(row=1, column=0, pady=(10,5), sticky="w")
 opcion2 = customtkinter.CTkCheckBox(framePreferencias, text="Baja Movilidad", font=fuente_base)
 opcion2.grid(row=2, column=0, pady=5, sticky="w")
 
-#TODO: Imprimir imprimir busqueda en el frame resultado
-# ----------------
-# Frame resultado
-# ----------------
+    #TODO: Imprimir imprimir busqueda en el frame resultado
+    # ----------------
+    # Frame resultado
+    # ----------------
 frameResultado = customtkinter.CTkFrame(frameTexto, border_width=2, fg_color="transparent", border_color=("black", "white"))
 frameResultado.grid_columnconfigure(0, weight=1)
 frameResultado.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)
 
-etiqResultado = customtkinter.CTkLabel(frameResultado, text="Rutas óptimas", font=fuente_subtitulo)
+etiqResultado = customtkinter.CTkLabel(frameResultado, text="Rutas óptima", font=fuente_subtitulo)
 etiqResultado.grid(row=0, column=0, pady = (20,0))
+
 # -----------------------------
 # Frame principal derecho (mapa)
 # -----------------------------
 frameMapa = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
-frameMapa.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-mapa_dibujo = mapa.dibujar_estaciones(750, 750)
-mapaLabel = customtkinter.CTkLabel(frameMapa, image=customtkinter.CTkImage(mapa_dibujo,size=(750, 750)), text="")
+mapa_dibujo = mapa.dibujar_estaciones(700, 700)
+mapaLabel = customtkinter.CTkLabel(frameMapa, image=customtkinter.CTkImage(mapa_dibujo,size=(700, 700)), text="")
 mapaLabel.grid(row=0, column=0, sticky="nsew")
 
 ventana.mainloop()

@@ -238,9 +238,15 @@ def min_button_callback(entry_hora, entry_min, paso):
     entry_hora.set(hora)
     entry_min.set(min)
                 
+def cambio_ventana():
+    frame_inicio.after(200, lambda: frame_inicio.destroy())
+    ventana.grid_rowconfigure(1, weight=0)
+    ventana.grid_columnconfigure(1, weight=1)
+    frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+    frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)                
             
 # -----------------
-# Frame principal
+# Ventana principal
 # -----------------
 ventana = customtkinter.CTk()
 
@@ -251,7 +257,7 @@ ventana.iconbitmap('Imagenes/Logo_metro.ico')
 ventana.title("Metro Ciudad de Mexico")
 ventana.minsize(1400,750)
 ventana.grid_columnconfigure(0, weight=1)
-ventana.grid_columnconfigure(1, weight=1)
+ventana.grid_rowconfigure(1, weight=1)
 # ventana.grid_rowconfigure(0, weight=1)
 
 fuente_base = customtkinter.CTkFont(family="Roboto", size=15, weight="normal") # Fuente base para los textos
@@ -260,8 +266,24 @@ fuente_titulo = customtkinter.CTkFont(family="Georgia", size= 40, weight="bold")
 estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
 estaciones_names.sort() # Ordena las estaciones alfabeticamente
 
+# ------------
+# Frame inicio 
+# ------------
+frame_inicio = customtkinter.CTkFrame(ventana, fg_color="transparent")
+frame_inicio.grid(row=1, column=0)
+
+boton_inicio = customtkinter.CTkButton(frame_inicio, text="|>", font=fuente_base, width=200, height=50, command=cambio_ventana)
+boton_inicio.grid(row=0, column=0)
+# play_button = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25))
+
+frame_nombres = customtkinter.CTkFrame(ventana, fg_color="transparent")
+frame_nombres.grid(row=2, column=0, padx=10, pady=10, sticky="nw")
+
+label_nombres = customtkinter.CTkLabel(frame_nombres, font=fuente_base, text="Pablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
+label_nombres.grid(row=0, column=0, padx=10, pady=10, sticky="sw")
+
 # ------------------------
-# Frame Titulo (texto)
+# Frame Titulo 
 # ------------------------
 frameTitulo = customtkinter.CTkFrame(ventana, fg_color=("white", "grey10"))
 frameTitulo.grid(row=0, column=0, columnspan =2, sticky="ew", padx = 20, pady = 20)
@@ -277,13 +299,13 @@ ajustes_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes
 botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
 botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
-# ------------------------
-# Frame izquierdo (texto)
-# ------------------------
+    # ------------------------
+    # Frame izquierdo (texto)
+    # ------------------------
 frameTexto = customtkinter.CTkFrame(ventana, fg_color=("grey80", "grey19")) # TODO:Color Provisional 
 frameTexto.grid_columnconfigure((0,1), weight=1)
 frameTexto.grid_rowconfigure(3, weight=1)
-frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+# frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
 
     # -------------------------
     # Frame origen y destino
@@ -380,7 +402,7 @@ etiqResultado.grid(row=0, column=0, pady = (20,0))
 frameMapa = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
-frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+# frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
 mapa_dibujo = mapa.dibujar_estaciones(700, 700)
 mapaLabel = customtkinter.CTkLabel(frameMapa, image=customtkinter.CTkImage(mapa_dibujo,size=(700, 700)), text="")

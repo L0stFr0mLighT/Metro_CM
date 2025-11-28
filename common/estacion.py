@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 @dataclass(eq=True, frozen=True)
 class Estacion:
@@ -21,10 +21,7 @@ class Linea:
     cabeceras: tuple[Estacion, Estacion]
     color: tuple[float, float, float]
     pos_cuadrado: tuple[float, float]
-
-    @classmethod
-    def crear_linea(cls, numero: int,cabeceras: tuple[Estacion, Estacion], color: tuple[float, float, float], pos_cuadrado: tuple[float, float]) -> 'Linea':
-        return Linea(numero, cabeceras, (color[0] / 255, color[1] / 255, color[2] / 255), pos_cuadrado)
+    frecuencia: float
 
 @dataclass
 class Conexion:

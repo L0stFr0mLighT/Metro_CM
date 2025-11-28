@@ -40,7 +40,8 @@ class Grafo:
     def calcular_peso(self, cnx_origen: tuple[Estacion, Linea | None], cnx_dest: tuple[Estacion, Linea | None], _attr) -> float | None:
         M = 100 # Valor grande
         if cnx_origen[1] == None:
-            return 0
+            assert cnx_dest[1] != None
+            return 0 + cnx_dest[1].frecuencia / 2   # Empiezas el viaje
         
         if cnx_dest[1] == None:
             if cnx_dest[0] == self.destino_actual:
@@ -52,7 +53,8 @@ class Grafo:
             if transb == None:
                 print("ERROR: La clase Mapa no ha encontrado el transbordo !!")
                 return None
-            return transb.tiempo_trasbordo + M if self.menos_transbordos else transb.tiempo_trasbordo
+            tiempo_transb = transb.tiempo_trasbordo + cnx_dest[1].frecuencia / 2
+            return tiempo_transb + M if self.menos_transbordos else tiempo_transb
 
         cnx = self.mapa.buscar_conexion(cnx_origen[0], cnx_dest[0])
         if cnx == None:

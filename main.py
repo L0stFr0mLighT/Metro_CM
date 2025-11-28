@@ -1,7 +1,7 @@
 import customtkinter
 from estaciones import *
-from networkx import astar_path
 from motor.mapa import Mapa
+from motor.grafo import Grafo
 from PIL import Image
 from tiempo.tiempo import sumar_hora, sumar_minutos
 from CTkScrollableDropdown import CTkScrollableDropdown
@@ -9,8 +9,8 @@ from CTkScrollableDropdown import CTkScrollableDropdown
 mapa = Mapa()
 mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
 
-
-# TODO: Interfaz grafica
+grafo = Grafo()
+grafo.set_grafo(CONEXIONES, TRANSBORDOS, mapa)
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 idioma = "Español"
@@ -151,8 +151,18 @@ def buscar_rutas():
     destino_text = destino.get()
     menos_trasbordos = opcion1.get()
     baja_movilidad = opcion2.get()
-    hora_salida = entry_hora.get() + ":" + entry_min.get()
+    hora_salida = entry_hora.get()
+    min_salida = entry_min.get()
 
+    camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
+    if camino == None:
+        # TODO: Indicar que no hay camino
+        print("ERROR: No hay camino")
+    # TODO: Mostrar el camino
+    tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
+    
+    hora_estimada = sumar_minutos(hora_salida, min_salida, tiempo_camino)
+    print("WARN: Hora estimada: {}".format(hora_estimada))
 
 # Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
@@ -285,7 +295,7 @@ CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrol
 destino.grid(row=1, column=1)
 
 lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png").resize((25, 25)), size=(25, 25)) # Botón lupa
-botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
+botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, command=buscar_rutas, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
 
 

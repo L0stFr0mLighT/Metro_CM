@@ -38,6 +38,9 @@ class Grafo:
             self.grafo.add_edge((transbordo.estacion, transbordo.linea1), (transbordo.estacion, transbordo.linea2))
 
     def calcular_peso(self, cnx_origen: tuple[Estacion, Linea | None], cnx_dest: tuple[Estacion, Linea | None], _attr) -> float | None:
+        """
+        Calcula el coste de ir entre los dos vertices dados. Usado para NetworkX
+        """
         M = 100 # Valor grande
         if cnx_origen[1] == None:
             assert cnx_dest[1] != None
@@ -63,12 +66,18 @@ class Grafo:
         return cnx[1]
 
     def heuristica(self, origen: Estacion, meta: Estacion) -> float:
+        """
+        Calcula la heuristica
+        """
         VELOCIDAD_MEDIA = 33 / 60 # km / min
         # Calculamos la distancia entre dos puntos usando geopy
         distancia = distance(origen.localizacion, meta.localizacion).km
         return distancia / VELOCIDAD_MEDIA
 
     def calcular_camino_minimo(self, origen: str, dest: str, menos_transbordos: bool) -> list[tuple[Estacion, Linea | None]] | None:
+        """
+        Calcula el camino minimo usando A*
+        """
         self.destino_actual = None
         self.menos_transbordos = menos_transbordos
 
@@ -90,3 +99,14 @@ class Grafo:
             self.destino_actual = None
             self.menos_transbordos = False
             return None
+    
+    def calcular_tiempo_camino(self, camino: list[tuple[Estacion, Linea | None]]) -> float:
+        """
+        Calcula el tiempo para recorrer el camino en minutos
+        """
+        res = 0
+        for i in range(len(camino) - 1):
+            coste = self.calcular_peso(camino[i], camino[i+1], None)
+            res += 0 if coste == None else coste
+        
+        return res

@@ -11,7 +11,13 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Preferencias de viaje:",
         "opcion1": "Menos trasbordos",
         "opcion2": "Baja Movilidad",
-        "resultado": "Rutas óptimas"
+        "resultado": "Rutas óptimas",
+        "inicio": "Inicio",
+        "ajustes": "Ajustes",
+        "acercaDe": "Acerca de",
+        "cerrar": "Cerrar",
+        "formatoLetra": "Formato de letra:",
+        "idioma": "Idioma:"
     },
     "Inglés": {
         "idiomas": ["Spanish", "English", "French"],
@@ -23,7 +29,13 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Travel preferences:",
         "opcion1": "Fewer transfers",
         "opcion2": "Low mobility",
-        "resultado": "Optimal routes"
+        "resultado": "Optimal routes",
+        "inicio": "Start",
+        "ajustes": "Settings",
+        "acercaDe": "About",
+        "cerrar": "Close",
+        "formatoLetra": "Font format:",
+        "idioma": "Language:",
     },
     "Francés": {
         "idiomas": ["Espagnol", "Anglais", "Français"],
@@ -35,7 +47,13 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Préférences de voyage:",
         "opcion1": "Moins de transferts",
         "opcion2": "Mobilité réduite",
-        "resultado": "Itinéraires optimaux"
+        "resultado": "Itinéraires optimaux",
+        "inicio": "Commencer",
+        "ajustes": "Ajustements",
+        "acercaDe": "À propos de",
+        "cerrar": "Fermer",
+        "formatoLetra": "Police format:",
+        "idioma": "Langue:",
     }
 }
 
@@ -45,7 +63,7 @@ idioma = "Español"
 def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel]):
     ajustes = customtkinter.CTkToplevel(ventana)
     ajustes.title(TRADUCCIONES[idioma]["titulo_ajustes"])
-    ajustes.after(10, lambda: ajustes.focus_force()) # Hace que la ventana de ajustes esté por arriba
+    ajustes.focus_force() # Hace que la ventana de ajustes esté por arriba
     ajustes.grab_set()                               # Hace que no se pueda interactuar con la ventana principal hasta cerrar esta
     ajustes.resizable(False, False)                  # No permite cambiar tamaño de la ventana
     
@@ -73,7 +91,13 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
     modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
     
+    
+    labelFormato = customtkinter.CTkLabel(tab_actual, text="Formato de letra:", font=fuentes[0])
+    labels.append(labelFormato)
+    labelFormato.grid(row=3, column=0, padx=2, pady=1, sticky="w")
+    
     labelIdioma = customtkinter.CTkLabel(tab_actual, text="Idioma:", font=fuentes[0])
+    labels.append(labelIdioma)
     labelIdioma.grid(row=1, column=0, padx=2, pady=1, sticky="w")
     
     idioma_var = customtkinter.StringVar(value=TRADUCCIONES[idioma]["idiomas"][IDIOMAS.index(idioma)])
@@ -83,8 +107,7 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
                                                             idiomaBoton.cget("values").index(idiomaBoton.get()), labels))
     idiomaBoton.grid(row=2, column=0, padx=2, pady=(0,20), sticky="ew")
     
-    labelFormato = customtkinter.CTkLabel(tab_actual, text="Formato de letra:", font=fuentes[0])
-    labelFormato.grid(row=3, column=0, padx=2, pady=1, sticky="w")
+    
     
     tipo_var = customtkinter.StringVar(value=fuentes[0].cget("family"))
     selecc_tipografia = customtkinter.CTkOptionMenu(tab_actual, font=fuentes[0], 
@@ -120,14 +143,14 @@ def cambio_idioma(ajustes : customtkinter.CTkToplevel , tabs : customtkinter.CTk
     idiomaBoton.configure(values=TRADUCCIONES[idioma]["idiomas"])
     idiomaBoton.set(TRADUCCIONES[idioma]["idiomas"][idioma_new_pos])
     
+    
+    
     # Cambia el idioma de la ventana principal
-    labels[0].configure(text=TRADUCCIONES[idioma]["etiq_origen"])
-    labels[1].configure(text=TRADUCCIONES[idioma]["etiq_destino"])
-    labels[2].configure(text=TRADUCCIONES[idioma]["etiq_Salida"])
-    labels[3].configure(text=TRADUCCIONES[idioma]["etiq_Preferencias"])
-    labels[4].configure(text=TRADUCCIONES[idioma]["opcion1"])
-    labels[5].configure(text=TRADUCCIONES[idioma]["opcion2"])
-    labels[6].configure(text=TRADUCCIONES[idioma]["resultado"])
+    i = 0
+    for key in TRADUCCIONES[idioma]:
+            if key not in ["idiomas", "titulo_ajustes", "apariencia"]:
+                labels[i].configure(text=TRADUCCIONES[idioma][key])
+                i += 1
     
 # TODO
 def cambio_tipografia(tipografia, fuentes: list[customtkinter.CTkFont]):

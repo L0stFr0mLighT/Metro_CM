@@ -109,14 +109,29 @@ def min_button_callback(entry_hora, entry_min, paso):
     entry_hora.set(hora)
     entry_min.set(min)
                 
-def cambio_ventana():
-    frame_inicio.after(200, lambda: frame_inicio.destroy())
-    frame_nombres.after(200, lambda: frame_nombres.destroy())
-    ventana.grid_rowconfigure(1, weight=0)
-    ventana.grid_columnconfigure(1, weight=1)
-    frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
-    frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)                
-            
+def cambio_ventana(tab):
+    match tab:
+        case "programa":
+            frame_inicio.grid_forget()
+            ventana.grid_rowconfigure(1, weight=0)
+            ventana.grid_columnconfigure(1, weight=1)
+            frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+            frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+            botonAjustesTitulo.grid(row=0, column=2, padx=10, pady=10, sticky="e") 
+            botonVolverTitulo.grid(row=0,column=3, padx=10, pady= 10, sticky= "e")           
+        case "about":
+            frame_inicio.grid_forget()
+            frameAbout.grid(row=1,column=0)
+        case "inicio":
+            frameTexto.grid_forget()
+            frameMapa.grid_forget()
+            frameAbout.grid_forget()
+            botonAjustesTitulo.grid_forget()
+            botonVolverTitulo.grid_forget()
+            ventana.grid_rowconfigure(1, weight=1)
+            ventana.grid_columnconfigure(1, weight=0)
+            frame_inicio.grid(row=1, column=0) 
+
 # -----------------
 # Ventana principal
 # -----------------
@@ -132,27 +147,49 @@ ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_rowconfigure(1, weight=1)
 # ventana.grid_rowconfigure(0, weight=1)
 
-fuente_base = customtkinter.CTkFont(family="Roboto", size=15, weight="normal") # Fuente base para los textos
+fuente_base = customtkinter.CTkFont(family="Roboto", size=16, weight="normal") # Fuente base para los textos
 fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30, weight="normal")
 fuente_titulo = customtkinter.CTkFont(family="Roboto", size= 40, weight="bold")
 estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
 estaciones_names.sort() # Ordena las estaciones alfabeticamente
 
 # ------------
-# Frame inicio 
+# Frame inicio
 # ------------
 frame_inicio = customtkinter.CTkFrame(ventana, fg_color="transparent")
-frame_inicio.grid(row=1, column=0)
+frame_inicio.grid(row=1, column=0, sticky="we")
+frame_inicio.grid_columnconfigure(0, weight=1)
+play_image = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_light.png")).resize((50, 50)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_dark.png")).resize((50, 50)), size=(50, 50)) # Botón inicio
+boton_inicio = customtkinter.CTkButton(frame_inicio, image=play_image, text="Inicio", width=300, font=fuente_titulo, command= lambda : cambio_ventana("programa"))
+boton_inicio.grid(row=0, column=0, padx=10, pady=(10,20))
 
-play_image = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_light.png")).resize((25, 25)), 
-                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_dark.png")).resize((25, 25)), size=(25, 25)) # Botón inicio
-boton_inicio = customtkinter.CTkButton(frame_inicio, image=play_image, text="", font=fuente_base, width=200, height=50, command=cambio_ventana)
-boton_inicio.grid(row=0, column=0)
+ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
+botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
+                                             command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
+                                                                                            labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma]))
+botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
 
-frame_nombres = customtkinter.CTkFrame(ventana, fg_color="transparent")
-frame_nombres.grid(row=2, column=0, padx=10, pady=10, sticky="nw")
+about_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_dark.png")).resize((25, 25)), size=(25, 25))
+botonAbout = customtkinter.CTkButton(frame_inicio, image=about_imagen, text="Acerca de", width=300, font=fuente_base, command=lambda : cambio_ventana("about"))
+botonAbout.grid(row=2, column=0, padx=10, pady=10)
 
-label_nombres = customtkinter.CTkLabel(frame_nombres, font=fuente_base, text="Pablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
+cerrar_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Cerrar_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Cerrar_dark.png")).resize((25, 25)), size=(25, 25))
+botonCerrarPrograma = customtkinter.CTkButton(frame_inicio, image=cerrar_imagen, text="Cerrar", width=300, font=fuente_base, command=lambda : ventana.destroy())
+botonCerrarPrograma.grid(row=3, column=0, padx=10, pady=10)
+
+# ------------------
+# Frame "Acerca de"
+# ------------------
+frameAbout = customtkinter.CTkFrame(ventana, fg_color="transparent")
+
+botonVolverAbout = customtkinter.CTkButton(frameAbout, text= "Volver", font= fuente_base, command=lambda : cambio_ventana("inicio"))
+botonVolverAbout.grid(row=1,column=0)
+
+label_nombres = customtkinter.CTkLabel(frameAbout, font=fuente_base, text="Programa creado por:\n\nPablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
 label_nombres.grid(row=0, column=0, padx=10, pady=10, sticky="sw")
 
 # ------------------------
@@ -168,12 +205,15 @@ labelLogo.grid(row=0, column=0, padx = 20)
 labelTitulo = customtkinter.CTkLabel(frameTitulo, text= "Metro Ciudad de México", font= fuente_titulo)
 labelTitulo.grid(row=0,column=1)
 
-ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
-                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
-botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
-                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],labels=[etiqOrigen,etiqDestino,etiqSalida,etiqPreferencias,opcion1,opcion2,etiqResultado]))
-botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
+botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
+                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
+                                                                        labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma]))
+
+volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_dark.png")).resize((25, 25)), size=(25, 25))
+botonVolverTitulo = customtkinter.CTkButton(frameTitulo ,image=volver_imagen, text="", width=30, height=30, corner_radius=10, command=lambda: cambio_ventana("inicio"))
+    
     # ------------------------
     # Frame izquierdo (texto)
     # ------------------------
@@ -207,10 +247,10 @@ CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrol
 # destino.grid(row=1, column=1, padx= 10, sticky="ew")
 destino.grid(row=1, column=1)
 
-lupa_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/lupa.png")).resize((25, 25)), size=(25, 25)) # Botón lupa
+lupa_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/lupa_light.png")).resize((25, 25)),
+                                     dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/lupa_dark.png")).resize((25, 25)), size=(25, 25)) # Botón lupa
 botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, command=buscar_rutas, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
-
 
     # -------------------
     # Frame entrada hora

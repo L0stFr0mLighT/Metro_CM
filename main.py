@@ -6,6 +6,7 @@ from PIL import Image
 from tiempo.tiempo import sumar_hora, sumar_minutos
 from CTkScrollableDropdown import CTkScrollableDropdown
 from os import path
+from ajustes import *
 
 mapa = Mapa()
 mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
@@ -14,137 +15,6 @@ grafo = Grafo()
 grafo.set_grafo(CONEXIONES, TRANSBORDOS, mapa)
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-idioma = "Español"
-
-def abrir_ajustes():
-    ajustes = customtkinter.CTkToplevel(ventana)
-    ajustes.title(TRADUCCIONES[idioma]["titulo_ajustes"])
-    ajustes.after(10, lambda: ajustes.focus_force()) # Hace que la ventana de ajustes esté por arriba
-    ajustes.grab_set()                               # Hace que no se pueda interactuar con la ventana principal hasta cerrar esta
-    ajustes.resizable(False, False)                  # No permite cambiar tamaño de la ventana
-    
-    tabs = customtkinter.CTkTabview(ajustes)
-    apariencia_name = TRADUCCIONES[idioma]["apariencia"]
-    tabs.add(apariencia_name)
-    tabs.set(apariencia_name)
-    tab_actual = tabs.tab(apariencia_name)
-    tabs.pack(fill="both", expand=True, padx=5, pady=10)
-    tabs.tab(apariencia_name).grid_columnconfigure((0,1), weight=1)
-    # tabs.tab(apariencia_name).grid_rowconfigure((0,1,2,3,4,5), weight=1)
-    
-    w_root = ventana.winfo_width()                   # Obtener tamaño y posición de la ventana principal
-    h_root = ventana.winfo_height()
-    x_ajustes= 250
-    y_ajustes= 300
-    x_top = (w_root - x_ajustes) // 2                      # Calcular posición centrada
-    y_top = (h_root - y_ajustes) // 2
-
-    ajustes.geometry(f"{x_ajustes}x{y_ajustes}+{x_top}+{y_top}") 
-    
-    modo = True if customtkinter.get_appearance_mode() == "Dark" else False
-    switch_var = customtkinter.BooleanVar(value=modo) 
-    texto = "🌙" if modo else "☀️"
-    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuente_base)
-    modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
-    
-    labelIdioma = customtkinter.CTkLabel(tab_actual, text="Idioma:", font=fuente_base)
-    labelIdioma.grid(row=1, column=0, padx=2, pady=1, sticky="w")
-    
-    idioma_var = customtkinter.StringVar(value=TRADUCCIONES[idioma]["idiomas"][IDIOMAS.index(idioma)])
-    idiomaBoton = customtkinter.CTkSegmentedButton(tab_actual, values=TRADUCCIONES[idioma]["idiomas"], font=fuente_base, variable=idioma_var) # Francés?
-    idiomaBoton.configure(command=lambda value: cambio_idioma(ajustes, tabs, idiomaBoton, idiomaBoton.cget("values").index(idiomaBoton.get())))
-    idiomaBoton.grid(row=2, column=0, padx=2, pady=(0,20), sticky="ew")
-    
-    labelFormato = customtkinter.CTkLabel(tab_actual, text="Formato de letra:", font=fuente_base)
-    labelFormato.grid(row=3, column=0, padx=2, pady=1, sticky="w")
-    
-    tipo_var = customtkinter.StringVar(value=fuente_base.cget("family"))
-    selecc_tipografia = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, values=["Roboto", "Arial", "Times New Roman"], anchor="center", variable=tipo_var, command=lambda value: cambio_tipografia(value))
-    selecc_tipografia.grid(row=4, column=0, padx=2, pady=(0,10), sticky="ew")
-    
-    tam_var = customtkinter.StringVar(value=fuente_base.cget("size"))
-    selecc_tamaño = customtkinter.CTkOptionMenu(tab_actual, font=fuente_base, anchor="center", variable=tam_var, values=["10", "12", "14", "16", "18", "20"])
-    selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value))
-    selecc_tamaño.grid(row=5, column=0, padx=2, pady=(0,10), sticky="ew")
-    
-def cambio_switch(switch):
-    if (switch.get() == 0):
-        customtkinter.set_appearance_mode("Light")
-        switch.configure(text="☀️")
-    else:
-        customtkinter.set_appearance_mode("Dark") 
-        switch.configure(text="🌙")
-        
-TRADUCCIONES = {
-    "Español": {
-        "idiomas": ["Español", "Inglés", "Francés"],
-        "titulo_ajustes": "Ajustes",
-        "apariencia": "Apariencia",
-        "etiq_origen": "Origen",
-        "etiq_destino": "Destino",
-        "etiq_Salida": "Hora de salida (HH:MM):",
-        "etiq_Preferencias": "Preferencias de viaje:",
-        "opcion1": "Menos trasbordos",
-        "opcion2": "Baja Movilidad",
-        "resultado": "Rutas óptimas"
-    },
-    "Inglés": {
-        "idiomas": ["Spanish", "English", "French"],
-        "titulo_ajustes": "Settings",
-        "apariencia": "Appearance",
-        "etiq_origen": "Beginning",
-        "etiq_destino": "Destination",
-        "etiq_Salida": "Departure time (HH:MM):",
-        "etiq_Preferencias": "Travel preferences:",
-        "opcion1": "Fewer transfers",
-        "opcion2": "Low mobility",
-        "resultado": "Optimal routes"
-    },
-    "Francés": {
-        "idiomas": ["Espagnol", "Anglais", "Français"],
-        "titulo_ajustes": "Paramètres",
-        "apariencia": "Apparence",
-        "etiq_origen": "Origine",
-        "etiq_destino": "Destination",
-        "etiq_Salida": "Heure de départ (HH:MM):",
-        "etiq_Preferencias": "Préférences de voyage:",
-        "opcion1": "Moins de transferts",
-        "opcion2": "Mobilité réduite",
-        "resultado": "Itinéraires optimaux"
-    }
-}
-
-IDIOMAS = ["Español", "Inglés", "Francés"]
-
-def cambio_idioma(ajustes, tabs, idiomaBoton, idioma_new):
-    global idioma
-    
-    # Cambia el idioma de la pestaña de ajustes
-    tabs.rename(TRADUCCIONES[idioma]["apariencia"], TRADUCCIONES[IDIOMAS[idioma_new]]["apariencia"])
-    tabs.set(TRADUCCIONES[IDIOMAS[idioma_new]]["apariencia"])
-    idioma = IDIOMAS[idioma_new]
-    ajustes.title(TRADUCCIONES[idioma]["titulo_ajustes"])
-    idiomaBoton.configure(values=TRADUCCIONES[idioma]["idiomas"])
-    idiomaBoton.set(TRADUCCIONES[idioma]["idiomas"][idioma_new])
-    
-    # Cambia el idioma de la ventana principal
-    etiqOrigen.configure(text=TRADUCCIONES[idioma]["etiq_origen"])
-    etiqDestino.configure(text=TRADUCCIONES[idioma]["etiq_destino"])
-    etiqSalida.configure(text=TRADUCCIONES[idioma]["etiq_Salida"])
-    etiqPreferencias.configure(text=TRADUCCIONES[idioma]["etiq_Preferencias"])
-    opcion1.configure(text=TRADUCCIONES[idioma]["opcion1"])
-    opcion2.configure(text=TRADUCCIONES[idioma]["opcion2"])
-    etiqResultado.configure(text=TRADUCCIONES[idioma]["resultado"])
-    
-# TODO
-def cambio_tipografia(tipografia):
-    fuente_base.configure(family=tipografia)
-    fuente_subtitulo.configure(family=tipografia)
-
-# TODO
-def cambio_tamaño_tipografia(tamaño):
-    fuente_base.configure( size=int(tamaño))
-    fuente_subtitulo.configure(size=int(tamaño)+15)
 
 # TODO
 def buscar_rutas():
@@ -263,7 +133,7 @@ ventana.grid_rowconfigure(1, weight=1)
 
 fuente_base = customtkinter.CTkFont(family="Roboto", size=15, weight="normal") # Fuente base para los textos
 fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30, weight="normal")
-fuente_titulo = customtkinter.CTkFont(family="Georgia", size= 40, weight="bold")
+fuente_titulo = customtkinter.CTkFont(family="Roboto", size= 40, weight="bold")
 estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
 estaciones_names.sort() # Ordena las estaciones alfabeticamente
 
@@ -298,7 +168,8 @@ labelTitulo.grid(row=0,column=1)
 
 ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
-botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
+botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
+                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],labels=[etiqOrigen,etiqDestino,etiqSalida,etiqPreferencias,opcion1,opcion2,etiqResultado]))
 botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
     # ------------------------
@@ -323,13 +194,13 @@ etiqDestino.grid(row=0, column=1, padx=(0,18), sticky="ew")
 
 # TODO: No cambiar tamaño al cambiar la opcion. Mirar con combo box o scrollable frame + radio buttons
 origen = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
-CTkScrollableDropdown(origen, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
+CTkScrollableDropdown(origen, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=False)
 # TODO: a lo mejor queda mejor con:
 # origen.grid(row=1, column=0, padx= 10, sticky="ew")
 origen.grid(row=1, column=0)
 
 destino = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
-CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=True)
+CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=False)
 # TODO: a lo mejor queda mejor con:
 # destino.grid(row=1, column=1, padx= 10, sticky="ew")
 destino.grid(row=1, column=1)

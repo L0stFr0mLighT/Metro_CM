@@ -2,7 +2,7 @@ import customtkinter
 from estaciones import *
 from motor.mapa import Mapa
 from motor.grafo import Grafo
-from PIL import Image
+from PIL import Image, ImageTk
 from tiempo.tiempo import sumar_hora, sumar_minutos
 from CTkScrollableDropdown import CTkScrollableDropdown
 from os import path
@@ -12,6 +12,8 @@ mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
 
 grafo = Grafo()
 grafo.set_grafo(CONEXIONES, TRANSBORDOS, mapa)
+
+RES_MAPA_X, RES_MAPA_Y = 700, 700
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 idioma = "Español"
@@ -148,7 +150,8 @@ def cambio_tamaño_tipografia(tamaño):
 
 # TODO
 def buscar_rutas():
-    mapa.dibujar_estaciones(700, 700)
+    global step, camino_animar, tiempo_inicio, id_linea
+    mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
 
     origen_text = origen.get()
     destino_text = destino.get()
@@ -168,18 +171,27 @@ def buscar_rutas():
     print("WARN: Hora estimada: {}".format(hora_estimada))
 
     # Animar el mapa
-    caminos_principales = list(dict.fromkeys(map(lambda x : x[0], camino)))
-    animar(0, caminos_principales)
+    camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
+    mapa_canvas.delete("all")
+    mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
+    tiempo_inicio = 0
+    step = 0
+    camino_animar = camino_dedup
+    animar()
 
-def animar(step: float, camino: list[Estacion]):
-    global mapaLabel, ventana
-    PASO = 0.75
-    PERIODO = int(float(1 / 60) * 1000)
-    # TODO: Cte simbolica
-    (nuevo_mapa, continuar) = mapa.dibujar_estaciones_con_recorrido(700, 700, camino, step)
-    mapaLabel.configure(image=customtkinter.CTkImage(nuevo_mapa, size=(700, 700)))
+id_linea = 0
+step = 0
+camino_animar = list()
+coordenadas = [(0, 0)]
+DIRECTOR = (5, 5)
+def animar():
+    global mapaLabel, ventana, imagen_mapa_tk, tiempo_inicio, step, camino_animar, coordenadas
+    PASO = 0.5
+    PERIODO = 20
+    continuar = mapa.dibujar_estaciones_con_recorrido(RES_MAPA_X, RES_MAPA_Y, camino_animar, step, mapa_canvas)
     if continuar:
-        ventana.after(PERIODO, lambda : animar(step + PASO, camino))
+        step = step + PASO
+        mapa_canvas.after(PERIODO, animar)
 
 # Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
@@ -406,8 +418,11 @@ frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
 # frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-mapa_dibujo = mapa.dibujar_estaciones(700, 700)
-mapaLabel = customtkinter.CTkLabel(frameMapa, image=customtkinter.CTkImage(mapa_dibujo,size=(700, 700)), text="")
-mapaLabel.grid(row=0, column=0, sticky="nsew")
+mapa_dibujo = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
+imagen_mapa_tk = ImageTk.PhotoImage(mapa_dibujo)
+# TODO: El color de fondo depende del modo de la apariencia
+mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(), width=imagen_mapa_tk.width(), highlightthickness=0, background="gray14")
+mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
+mapa_canvas.grid(row=0, column=0, sticky="nsew")
 
 ventana.mainloop()

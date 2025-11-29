@@ -5,6 +5,7 @@ from motor.grafo import Grafo
 from PIL import Image
 from tiempo.tiempo import sumar_hora, sumar_minutos
 from CTkScrollableDropdown import CTkScrollableDropdown
+from os import path
 
 mapa = Mapa()
 mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
@@ -253,7 +254,7 @@ ventana = customtkinter.CTk()
 ventana.geometry("{0}x{1}+0+0".format(ventana.winfo_screenwidth(), ventana.winfo_screenheight()))
 # ventana.geometry("1920x1080+0+0") 
 #ventana.after(0, lambda: ventana.state("zoomed")) # solo funciona en Windows
-ventana.iconbitmap('Imagenes/Logo_metro.ico')
+ventana.iconbitmap(path.join(path.dirname(__file__), 'Imagenes/Logo_metro.ico'))
 ventana.title("Metro Ciudad de Mexico")
 ventana.minsize(1400,750)
 ventana.grid_columnconfigure(0, weight=1)
@@ -289,13 +290,14 @@ frameTitulo = customtkinter.CTkFrame(ventana, fg_color=("white", "grey10"))
 frameTitulo.grid(row=0, column=0, columnspan =2, sticky="ew", padx = 20, pady = 20)
 frameTitulo.grid_columnconfigure(2, weight=1)
 
-imagenLogo = customtkinter.CTkImage(light_image=Image.open('Imagenes/Logo_metro.ico').resize((40,40)), dark_image=Image.open('Imagenes/Logo_metro.ico').resize((40,40)), size=(40,40))
+imagenLogo = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), 'Imagenes/Logo_metro.ico')).resize((40,40)), size=(40,40))
 labelLogo = customtkinter.CTkLabel(frameTitulo,image=imagenLogo, text="")
 labelLogo.grid(row=0, column=0, padx = 20)
 labelTitulo = customtkinter.CTkLabel(frameTitulo, text= "Metro Ciudad de México", font= fuente_titulo)
 labelTitulo.grid(row=0,column=1)
 
-ajustes_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25)) # Botón ajustes
+ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
 botonAjustes = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, command=abrir_ajustes)
 botonAjustes.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
@@ -332,7 +334,7 @@ CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrol
 # destino.grid(row=1, column=1, padx= 10, sticky="ew")
 destino.grid(row=1, column=1)
 
-lupa_imagen = customtkinter.CTkImage(light_image=Image.open("Imagenes/lupa.png").resize((25, 25)), size=(25, 25)) # Botón lupa
+lupa_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/lupa.png")).resize((25, 25)), size=(25, 25)) # Botón lupa
 botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, command=buscar_rutas, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
 

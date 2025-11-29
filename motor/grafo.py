@@ -25,6 +25,11 @@ class Grafo:
     menos_transbordos: bool = False
 
     def set_grafo(self, conexiones: list[Conexion], transbordos: list[Transbordo], mapa: Mapa):
+
+        # CONTEXTO: para resolver el problema de conocer en que linea exacta de una estacion empezamos,
+        # creamos un nodo extra para cada estacion (estacion general), que simboliza la entrada a la estacion.
+        # Desde este nodo, se puede ir a cualquier linea que pase por la estacion sin coste 
+        
         self.mapa = mapa
         for conexion in conexiones:
             # Añado las estaciones "generales"
@@ -41,16 +46,20 @@ class Grafo:
         """
         Calcula el coste de ir entre los dos vertices dados. Usado para NetworkX
         """
-        M = 100 # Valor grande
+        M = 100 # Valor grande que se usará como penalizacion por transbordo
+
+        # Entrada a una línea
         if cnx_origen[1] == None:
             assert cnx_dest[1] != None
             return 0 + cnx_dest[1].frecuencia / 2   # Empiezas el viaje
         
+        # Salida de la línea solo en la estación destino
         if cnx_dest[1] == None:
             if cnx_dest[0] == self.destino_actual:
                 return 0
             return None
         
+        # Transbordo entre líneas
         if cnx_origen[0] == cnx_dest[0]:
             transb = self.mapa.buscar_transbordos(cnx_origen[0], cnx_origen[1], cnx_dest[1])
             if transb == None:
@@ -59,6 +68,7 @@ class Grafo:
             tiempo_transb = transb.tiempo_trasbordo + cnx_dest[1].frecuencia / 2
             return tiempo_transb + M if self.menos_transbordos else tiempo_transb
 
+        # Tramo de viaje normal entre estaciones
         cnx = self.mapa.buscar_conexion(cnx_origen[0], cnx_dest[0])
         if cnx == None:
             print("ERROR: Hay una arista para la que la clase Mapa no tiene conexion !!")

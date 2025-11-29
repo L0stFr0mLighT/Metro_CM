@@ -21,6 +21,10 @@ def to_pil(surface: ImageSurface) -> Image.Image:
 
 @dataclass
 class Mapa:
+    """
+    Representa el mapa de la red de Metro
+    Se debe inicializar con Mapa.set_mapa
+    """
     estaciones: dict[str, Estacion] = field(default_factory=dict)
     lineas: list[Linea] = field(default_factory=list)
     adyacentes: dict[tuple[Estacion, Linea], tuple[tuple[Estacion, float], tuple[Estacion, float] | None]] \

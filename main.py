@@ -111,6 +111,7 @@ def min_button_callback(entry_hora, entry_min, paso):
                 
 def cambio_ventana():
     frame_inicio.after(200, lambda: frame_inicio.destroy())
+    frame_nombres.after(200, lambda: frame_nombres.destroy())
     ventana.grid_rowconfigure(1, weight=0)
     ventana.grid_columnconfigure(1, weight=1)
     frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
@@ -143,9 +144,10 @@ estaciones_names.sort() # Ordena las estaciones alfabeticamente
 frame_inicio = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frame_inicio.grid(row=1, column=0)
 
-boton_inicio = customtkinter.CTkButton(frame_inicio, text="|>", font=fuente_base, width=200, height=50, command=cambio_ventana)
+play_image = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_light.png")).resize((25, 25)), 
+                                        dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_dark.png")).resize((25, 25)), size=(25, 25)) # Botón inicio
+boton_inicio = customtkinter.CTkButton(frame_inicio, image=play_image, text="", font=fuente_base, width=200, height=50, command=cambio_ventana)
 boton_inicio.grid(row=0, column=0)
-# play_button = customtkinter.CTkImage(light_image=Image.open("Imagenes/Ajustes_light.png").resize((25, 25)), dark_image=Image.open("Imagenes/Ajustes_dark.png").resize((25, 25)), size=(25, 25))
 
 frame_nombres = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frame_nombres.grid(row=2, column=0, padx=10, pady=10, sticky="nw")

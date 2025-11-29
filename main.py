@@ -308,7 +308,7 @@ frameResultado = customtkinter.CTkFrame(frameTexto, border_width=2, fg_color="tr
 frameResultado.grid_columnconfigure(0, weight=1)
 frameResultado.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)
 
-etiqResultado = customtkinter.CTkLabel(frameResultado, text="Rutas óptima", font=fuente_subtitulo)
+etiqResultado = customtkinter.CTkLabel(frameResultado, text="Ruta óptima", font=fuente_subtitulo)
 etiqResultado.grid(row=0, column=0, pady = (20,0))
 
 # -----------------------------

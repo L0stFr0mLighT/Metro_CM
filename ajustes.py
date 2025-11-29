@@ -11,7 +11,7 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Preferencias de viaje:",
         "opcion1": "Menos trasbordos",
         "opcion2": "Baja Movilidad",
-        "resultado": "Rutas óptimas",
+        "resultado": "Ruta óptima",
         "inicio": "Inicio",
         "ajustes": "Ajustes",
         "acercaDe": "Acerca de",

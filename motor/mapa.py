@@ -9,6 +9,7 @@ import cairo
 
 FACTOR_ESCALA = 1.25
 
+#Dibujo de Cairo a PIL
 def to_pil(surface: ImageSurface) -> Image.Image:
     size = (surface.get_width(), surface.get_height())
     stride = surface.get_stride()
@@ -20,10 +21,14 @@ def to_pil(surface: ImageSurface) -> Image.Image:
 
 @dataclass
 class Mapa:
+    # Nombre_Estacion -> Estacion
     estaciones: dict[str, Estacion] = field(default_factory=dict)
     lineas: list[Linea] = field(default_factory=list)
+    # (Estacion, Linea) -> ((Estacion, tiempo), (Estacion, tiempo) | None) 
+    # Si es cabecera, el segundo elemento es None
     adyacentes: dict[tuple[Estacion, Linea], tuple[tuple[Estacion, float], tuple[Estacion, float] | None]] \
         = field(default_factory=dict)
+    # (Estacion_origen, Estacion_dest) -> (Linea, tiempo)
     conexion: dict[tuple[Estacion, Estacion], tuple[Linea, float]] = field(default_factory=dict)
     transbordos: list[Transbordo] = field(default_factory=list)
     
@@ -41,10 +46,11 @@ class Mapa:
         for conexion in conexiones:
             self.conexion[(conexion.origen, conexion.dest)] = (conexion.linea, conexion.tiempo)
 
+            #Dado una conexion entre dos estaciones, miramos si desde la estacion origen ya hay vecinos
             elem = self.adyacentes.get((conexion.origen, conexion.linea))
-            if elem == None:
+            if elem == None: # Si no hay vecinos, lo añadimos directamente
                 self.adyacentes[(conexion.origen, conexion.linea)] = ((conexion.dest, conexion.tiempo), None)
-            else:
+            else: # Si ya hay vecinos, añadimos el nuevo en la segunda posicion (significa que ya hemos visitado la estacion antes)
                 self.adyacentes[(conexion.origen, conexion.linea)] = (elem[0], (conexion.dest, conexion.tiempo))
 
     def get_estaciones_adyacentes(self, est: Estacion, linea: Linea) -> tuple[Estacion, Estacion | None] | None:
@@ -58,7 +64,7 @@ class Mapa:
         
         first = elem[0]
         second = elem[1]
-        if second == None:
+        if second == None: # Es cabecera
             return (first[0], None)
         return (first[0], second[0])
 
@@ -70,11 +76,16 @@ class Mapa:
         return self.estaciones.get(nombre)
 
     def buscar_conexion(self, origen: Estacion, dest: Estacion) -> tuple[Linea, float] | None:
+        """
+        Devuelve la linea de conexion entre dos estaciones y el tiempo de viaje.
+        None si no existe dicha conexion
+        """
         return self.conexion.get((origen, dest))
 
     def buscar_transbordos(self, est: Estacion, l1: Linea, l2: Linea) -> Transbordo | None:
         """
-        Devuelve la informacion de transbordo entre dos lineas en una estacion
+        Devuelve la informacion de transbordo entre dos lineas en una estacion.
+        None si no existe dicho transbordo
         """
         for transbordo in self.transbordos:
             if transbordo.estacion == est:
@@ -86,6 +97,9 @@ class Mapa:
 
     def seleccionar_siguiente_estacion(self, linea_actual: Linea, estacion_actual: Estacion, visitados: set[Estacion]) -> Estacion:
         vecinos = self.get_estaciones_adyacentes(estacion_actual, linea_actual)
+        """
+        Dada una linea y una estacion, selecciona la siguiente estacion a visitar
+        """
         assert vecinos != None
         v1, v2 = vecinos[0], vecinos[1]
 
@@ -105,35 +119,41 @@ class Mapa:
         """
         Pinta el mapa inicial, inicializando la superficie de imagen
         """
+        # Creo imgagen en blanco donde dibujar
         self._mapa_actual = ImageSurface(FORMAT_ARGB32, int(FACTOR_ESCALA * res_x), int(FACTOR_ESCALA * res_y))
+        # Creo contexto de dibujo: le explico que voy a dibujar en la imagen creada
         self._ctx = Context(self._mapa_actual)
+        # Escalo el contexto para que se adapte a la resolucion dada
         self._ctx.scale(float(FACTOR_ESCALA * res_x), float(FACTOR_ESCALA * res_y))
 
         for linea in self.lineas:
             visitados = set()
             estacion_actual = linea.cabeceras[0]
             
+            # Dibujar cuadro para el número de línea
             lado = 0.05
             roundRect.roundrect(self._ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
             self._ctx.close_path()
             self._ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
             self._ctx.fill()
+            # Dibujo el borde negro para el cuadrado del número de línea
             self._ctx.set_line_width(0.002)
             roundRect.roundrect(self._ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
             self._ctx.set_source_rgba(0, 0, 0)
             self._ctx.stroke()
             
-            # Dibujar número centrado
-            self._ctx.set_source_rgba(1, 1, 1)
+            # Dibujar número centrado dentro del cuadrado
+            self._ctx.set_source_rgba(1, 1, 1) #Color blanco
             self._ctx.select_font_face("Arial", 0, cairo.FONT_WEIGHT_BOLD)
             self._ctx.set_font_size(0.03)
-            te = self._ctx.text_extents(str(linea.numero))
-            x_centro = linea.pos_cuadrado[0] + (lado - te.width) / 2 - te.x_bearing
+            te = self._ctx.text_extents(str(linea.numero)) #Pregunta a Cairo cuánto ocupa el texto
+            x_centro = linea.pos_cuadrado[0] + (lado - te.width) / 2 - te.x_bearing # Consigo la posición centrada
             y_centro = linea.pos_cuadrado[1] + (lado - te.height) / 2 - te.y_bearing
-            self._ctx.move_to(x_centro, y_centro)
-            self._ctx.show_text(str(linea.numero))
+            self._ctx.move_to(x_centro, y_centro) 
+            self._ctx.show_text(str(linea.numero)) #Dibujo el número de línea
             self._ctx.stroke()
             
+            #Segmentos entre estaciones de una línea
             while estacion_actual != linea.cabeceras[1]:
                 visitados.add(estacion_actual)
 
@@ -141,34 +161,38 @@ class Mapa:
                 estacion_siguiente = self.seleccionar_siguiente_estacion(linea, estacion_actual, visitados) 
                 # Dibujar recta
                 self._ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
-                
                 x1, y1 = estacion_siguiente.pos_mapa[0], estacion_siguiente.pos_mapa[1]
                 self._ctx.set_line_width(0.01)
-                self._ctx.move_to(x0, y0)
-                self._ctx.line_to(x1, y1)
+                self._ctx.move_to(x0, y0) # Punto inicial
+                self._ctx.line_to(x1, y1) # Punto final
                 self._ctx.stroke()
 
                 estacion_actual = estacion_siguiente
                 
                 pass
             pass
-
+        # Dibujo las estaciones encima de las líneas
         for estacion in self.estaciones.values():
+            
+            #Dibuja el punto de la estación
             self._ctx.set_line_width(0.005)
             self._ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
             self._ctx.close_path()
             self._ctx.set_source_rgba(1, 1, 1)
             self._ctx.fill()
+
+            #Dibuja el borde del punto de la estación
             self._ctx.set_line_width(0.003)
             self._ctx.arc(estacion.pos_mapa[0], estacion.pos_mapa[1], 0.005, 0.0, 2.0 * math.pi)
             self._ctx.set_source_rgba(0, 0, 0)
             self._ctx.stroke()
 
-            label = estacion.nombre        # Dibuja el nombre de la estación
+            # Dibuja el nombre de la estación
+            label = estacion.nombre
             self._ctx.set_source_rgba(estacion.color[0]/255,estacion.color[1]/255, estacion.color[2]/255)   # Color
             self._ctx.set_font_size(0.02)        # Tamaño
             self._ctx.move_to(estacion.pos_nombre[0], estacion.pos_nombre[1]) # Posición
-            self._ctx.show_text(label)
+            self._ctx.show_text(label)      # Dibuja el texto
 
     def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
                                          step: float) -> tuple[Image.Image, bool]:

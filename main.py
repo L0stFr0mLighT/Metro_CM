@@ -35,14 +35,14 @@ def buscar_rutas():
 
     # Si falta origen o destino, no hacemos nada
     if origen_text not in estaciones_names or destino_text not in estaciones_names:
-        print("WARN: Origen o destino vacío")
+        mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
         return
     
     # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
     if camino is None:
         # TODO: Indicar que no hay camino
-        print("ERROR: No hay camino entre esas estaciones")
+        mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
         return 
     # TODO: Mostrar el camino
     
@@ -51,8 +51,10 @@ def buscar_rutas():
     
     # Suma el tiempo de viaje a la hora de salida para obtener la hora estimada de llegada
     hora_estimada = sumar_minutos(hora_salida, min_salida, tiempo_camino)
-    print("WARN: Hora estimada: {}".format(hora_estimada))
 
+    # camino: lista de (Estacion, Linea|None)  -> lo usamos para describir la ruta
+    mostrar_resultado(camino, tiempo_camino, hora_estimada, hay_camino=True)
+    
     # Prepara el camino para la animación:
     # camino es una lista de tuplas (Estacion, Linea), nos quedamos solo con las Estaciones
     camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
@@ -93,6 +95,115 @@ def animar():
         step = step + PASO
         mapa_canvas.after(PERIODO, animar)
 
+def mostrar_resultado(camino_vertices, tiempo_total, hora_estimada, hay_camino=True):
+
+    # ----- LIMPIAR CONTENIDO -----
+    for widget in frameResultado.grid_slaves():
+        if widget.grid_info().get("row", 0) != 0: # Mantener el título
+            widget.destroy()
+
+    # ----- TARJETA -----
+    card = customtkinter.CTkFrame(
+        frameResultado,
+        fg_color=("gray90", "gray20"),
+        corner_radius=10
+    )
+    card.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+    card.grid_columnconfigure(0, weight=1)
+
+    # Caso sin ruta
+    if not hay_camino or not camino_vertices:
+        customtkinter.CTkLabel(
+            card,
+            text="No existe ruta entre las estaciones seleccionadas.",
+            font=fuente_base,
+            anchor="w",
+            justify="left"
+        ).grid(row=0, column=0, padx=20, pady=20, sticky="w")
+        return
+
+    # ----- ORIGEN Y DESTINO -----
+    origen_est = camino_vertices[0][0]
+    destino_est = camino_vertices[-1][0]
+
+    # ====== (1) RESUMEN ======
+    resumen = (
+        f"Origen:  {origen_est.nombre}\n"
+        f"Destino: {destino_est.nombre}\n"
+        f"Duración total: {tiempo_total} min\n"
+        f"Llegada estimada: {hora_estimada[0]}:{hora_estimada[1]}"
+    )
+
+    customtkinter.CTkLabel(
+        card,
+        text="Resumen del trayecto",
+        font=customtkinter.CTkFont(size=16, weight="bold"),
+        anchor="w"
+    ).grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
+
+    customtkinter.CTkLabel(
+        card,
+        text=resumen,
+        font=fuente_resultado,
+        anchor="w",
+        justify="left"
+    ).grid(row=1, column=0, padx=25, pady=(0, 15), sticky="w")
+
+    # ====== (2) DETALLE USANDO estaciones_principales ======
+    principales = grafo.estaciones_principales(camino_vertices)
+
+    customtkinter.CTkLabel(
+        card,
+        text="Detalle del recorrido",
+        font=customtkinter.CTkFont(size=16, weight="bold"),
+        anchor="w"
+    ).grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
+
+    pasos = []
+
+    # Buscar la primera línea NO None en el camino
+    primera_linea = None
+    for _, linea in camino_vertices:
+        if linea is not None:
+            primera_linea = linea
+            break
+
+    if primera_linea is None:
+        # Ruta rara, sin líneas asociadas
+        texto_detalle = "No hay información de líneas para este recorrido."
+    else:
+        # Primer tramo
+        pasos.append(f"• Toma la línea {primera_linea.numero} en {origen_est.nombre}.")
+
+        # Transbordos (usamos estaciones_principales)
+        for i in range(0, len(principales) - 1, 2):
+            est_a, linea_a = principales[i] # Estación donde se transborda
+            est_b, linea_b = principales[i + 1] # Estación destino del tramo siguiente
+
+            # línea_b podría ser None en algún caso raro; lo ignoramos
+            if linea_b is None:
+                continue
+
+            pasos.append(
+                f"• En {est_a.nombre}, haz transbordo a la línea {linea_b.numero} "
+                f"y sigue hasta {est_b.nombre}."
+            )
+
+        # Llegada
+        pasos.append(f"• Llega a tu destino: {destino_est.nombre}.")
+
+        texto_detalle = "\n".join(pasos)
+
+    customtkinter.CTkLabel(
+        card,
+        text=texto_detalle,
+        font=fuente_resultado,
+        anchor="w",
+        justify="left",
+        wraplength=600
+    ).grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
+
+
 def character_limit_hour(entry_text):
     """
     Controla que el valor de la hora introducida sea válido (00–23).
@@ -124,7 +235,7 @@ def character_limit_min(entry_text):
             entry_text.set(primerCar)
         else:
             entry_text.set(entry_text.get()[:2])
-      
+            
 def hora_button_callback(entry_hora, entry_min, paso):
     """
     Suma o resta 'paso' horas a la hora actual, respetando el formato HH
@@ -197,6 +308,9 @@ ventana.grid_rowconfigure(1, weight=1)
 fuente_base = customtkinter.CTkFont(family="Roboto", size=16, weight="normal") # Fuente base para los textos
 fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30, weight="normal")
 fuente_titulo = customtkinter.CTkFont(family="Roboto", size= 40, weight="bold")
+
+# Fuente específica para el texto de resultados (un poco más compacta)
+fuente_resultado = customtkinter.CTkFont(family="Roboto", size=14, weight="normal")
 
 # Lista de nombres de estaciones ordenada alfabéticamente para los combobox
 estaciones_names = [e.nombre for e in ESTACIONES]
@@ -359,6 +473,7 @@ opcion2.grid(row=2, column=0, pady=5, sticky="w")
 frameResultado = customtkinter.CTkFrame(frameTexto, border_width=2, fg_color="transparent", border_color=("black", "white"))
 frameResultado.grid_columnconfigure(0, weight=1)
 frameResultado.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)
+frameResultado.grid_rowconfigure(1, weight=1)
 
 etiqResultado = customtkinter.CTkLabel(frameResultado, text="Ruta óptima", font=fuente_subtitulo)
 etiqResultado.grid(row=0, column=0, pady = (20,0))

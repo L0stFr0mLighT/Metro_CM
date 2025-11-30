@@ -31,7 +31,6 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     tab_actual = tabs.tab(apariencia_name)  # Contenedor interno de la pestaña
     tabs.pack(fill="both", expand=True, padx=5, pady=10)
     tabs.tab(apariencia_name).grid_columnconfigure((0,1), weight=1)
-    #TODO tabs.tab(apariencia_name).grid_rowconfigure((0,1,2,3,4,5), weight=1)
     
     # Cálculo del tamaño y centrado de la ventana de ajustes respecto a la principal
     w_root = ventana.winfo_width()  

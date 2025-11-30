@@ -25,8 +25,6 @@ hora_estimada = ["00", "00"]
 principales = list()
 
 idioma = get_idioma()
-
-# TODO
 def buscar_rutas():
     """
     Llama al motor de rutas (A*), calcula el tiempo estimado del trayecto
@@ -37,7 +35,6 @@ def buscar_rutas():
     origen_text = origen.get()
     destino_text = destino.get()
     menos_trasbordos = opcion1.get()
-    baja_movilidad = opcion2.get() #TODO De momento no usado
     hora_salida = entry_hora.get()
     min_salida = entry_min.get()
 
@@ -121,11 +118,11 @@ def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], hay_ca
 
     idioma = get_idioma()
       
-    # ====== (2) DETALLE  ======
+    # ------ RESUMEN Y DETALLES -----
     texto_detalle = get_texto_detalle(principales, idioma)
     labelTextoDetalle.configure(text=texto_detalle)
     labelTextoDetalle.grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
-    # ====== (1) RESUMEN ======
+    
     resumen = get_resumen(principales, tiempo_total, hora_estimada, idioma)
     if(TRADUCCIONES[idioma]["detalles origen == destino"] != texto_detalle):
         labelDetalleTitulo.grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
@@ -267,7 +264,7 @@ ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.di
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
                                              command= lambda : abrir_ajustes(ventana=ventana, fuentes=fuentesList, 
-                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
+                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
                                                                       mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y], 
                                                                       tiempo_total=tiempo_total, hora_estimada=hora_estimada, principales=principales))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
@@ -309,7 +306,7 @@ labelTitulo.grid(row=0,column=1)
 # Botón ajustes en la barra superior (se muestra solo en modo "programa")
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
                                        command=lambda : abrir_ajustes(ventana=ventana, fuentes=fuentesList, 
-                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
+                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
                                                                       mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y], 
                                                                       tiempo_total=tiempo_total, hora_estimada=hora_estimada, principales=principales))
 
@@ -321,10 +318,9 @@ botonVolverTitulo = customtkinter.CTkButton(frameTitulo ,image=volver_imagen, te
 # -----------------------------------
 # Frame izquierdo: formulario (texto)
 # -----------------------------------
-frameTexto = customtkinter.CTkFrame(ventana, fg_color=("grey80", "grey19")) # TODO:Color Provisional 
+frameTexto = customtkinter.CTkFrame(ventana, fg_color=("grey80", "grey19"))
 frameTexto.grid_columnconfigure((0,1), weight=1)
 frameTexto.grid_rowconfigure(3, weight=1)
-# frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
 
 # -------------------------
 # Frame origen y destino
@@ -397,10 +393,7 @@ etiqPreferencias = customtkinter.CTkLabel(framePreferencias, text="Preferencias 
 etiqPreferencias.grid(row=0, column=0, pady=(0,5), sticky="w")
 opcion1 = customtkinter.CTkCheckBox(framePreferencias, text="Menos trasbordos", font=fuente_base,)
 opcion1.grid(row=1, column=0, pady=(10,5), sticky="w")
-opcion2 = customtkinter.CTkCheckBox(framePreferencias, text="Baja Movilidad", font=fuente_base)
-opcion2.grid(row=2, column=0, pady=5, sticky="w")
 
-#TODO: Imprimir imprimir busqueda en el frame resultado
 # ----------------
 # Frame resultado
 # ----------------
@@ -427,7 +420,6 @@ labelTextoDetalle = customtkinter.CTkLabel(card, text="2", font=fuente_resultado
 frameMapa = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
-# frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
 color_canvas = "grey14" if customtkinter.get_appearance_mode() == "Dark" else "grey92"
 
@@ -436,7 +428,6 @@ mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(),
 mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 mapa_canvas.grid(row=0, column=0, sticky="nsew")
 
-# labelsList=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen]
 fuentesList=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado, fuente_resultado_titulo]
 
 ventana.mainloop()

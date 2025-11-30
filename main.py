@@ -20,8 +20,8 @@ customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark
 
 # TODO
 def buscar_rutas():
-    global step, camino_animar, tiempo_inicio, id_linea
-    mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
+    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk
+    imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
 
     origen_text = origen.get()
     destino_text = destino.get()
@@ -181,7 +181,7 @@ ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.di
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
                                              command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
                                                                                             labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                                            canvas=mapa_canvas))
+                                                                                            canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
 
 about_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_light.png")).resize((25, 25)), 
@@ -222,7 +222,7 @@ labelTitulo.grid(row=0,column=1)
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
                                        command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
                                                                         labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                        canvas=mapa_canvas))
+                                                                        canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_dark.png")).resize((25, 25)), size=(25, 25))
@@ -333,10 +333,10 @@ frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
 # frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-mapa_dibujo = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
-imagen_mapa_tk = ImageTk.PhotoImage(mapa_dibujo)
+color_canvas = "grey14" if customtkinter.get_appearance_mode() == "Dark" else "grey92"
+
+imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
 # TODO: El color de fondo depende del modo de la apariencia
-color_canvas = "gray14" if customtkinter.get_appearance_mode() == "Dark" else "gray92"
 mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(), width=imagen_mapa_tk.width(), highlightthickness=0, background=color_canvas)
 mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 mapa_canvas.grid(row=0, column=0, sticky="nsew")

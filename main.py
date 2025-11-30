@@ -41,11 +41,9 @@ def buscar_rutas():
     # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
     if camino is None:
-        # TODO: Indicar que no hay camino
         mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
         return 
-    # TODO: Mostrar el camino
-    
+
     # Calcula el tiempo total del camino en minutos
     tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
     
@@ -95,7 +93,8 @@ def animar():
         step = step + PASO
         mapa_canvas.after(PERIODO, animar)
 
-def mostrar_resultado(camino_vertices, tiempo_total, hora_estimada, hay_camino=True):
+def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], 
+                      tiempo_total: int, hora_estimada: tuple[str, str], hay_camino: bool):
 
     # ----- LIMPIAR CONTENIDO -----
     for widget in frameResultado.grid_slaves():
@@ -103,21 +102,17 @@ def mostrar_resultado(camino_vertices, tiempo_total, hora_estimada, hay_camino=T
             widget.destroy()
 
     # ----- TARJETA -----
-    card = customtkinter.CTkFrame(
-        frameResultado,
-        fg_color=("gray90", "gray20"),
-        corner_radius=10
-    )
+    card = customtkinter.CTkFrame(frameResultado, fg_color=("gray90", "gray20"), corner_radius=10)
     card.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
     card.grid_columnconfigure(0, weight=1)
 
     # Caso sin ruta
     if not hay_camino or not camino_vertices:
         customtkinter.CTkLabel(
-            card,
+            card, 
             text="No existe ruta entre las estaciones seleccionadas.",
-            font=fuente_base,
-            anchor="w",
+            font=fuente_base, 
+            anchor="w", 
             justify="left"
         ).grid(row=0, column=0, padx=20, pady=20, sticky="w")
         return
@@ -335,7 +330,7 @@ boton_inicio.grid(row=0, column=0, padx=10, pady=(10,20))
 ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
-                                             command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
+                                             command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
                                                                                             labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
                                                                                             canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
@@ -376,7 +371,7 @@ labelTitulo.grid(row=0,column=1)
 
 # Botón ajustes en la barra superior (se muestra solo en modo "programa")
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
-                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
+                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
                                                                         labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
                                                                         canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 
@@ -384,7 +379,7 @@ botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, 
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_dark.png")).resize((25, 25)), size=(25, 25))
 botonVolverTitulo = customtkinter.CTkButton(frameTitulo ,image=volver_imagen, text="", width=30, height=30, corner_radius=10, command=lambda: cambio_ventana("inicio"))
-    
+
 # -----------------------------------
 # Frame izquierdo: formulario (texto)
 # -----------------------------------

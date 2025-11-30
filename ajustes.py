@@ -29,7 +29,7 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Travel preferences:",
         "opcion1": "Fewer transfers",
         "opcion2": "Low mobility",
-        "resultado": "Optimal routes",
+        "resultado": "Optimal route",
         "inicio": "Start",
         "ajustes": "Settings",
         "acercaDe": "About",
@@ -47,7 +47,7 @@ TRADUCCIONES = {
         "etiq_Preferencias": "Préférences de voyage:",
         "opcion1": "Moins de transferts",
         "opcion2": "Mobilité réduite",
-        "resultado": "Itinéraires optimaux",
+        "resultado": "Itinéraire optimale",
         "inicio": "Commencer",
         "ajustes": "Ajustements",
         "acercaDe": "À propos de",
@@ -60,7 +60,8 @@ TRADUCCIONES = {
 IDIOMAS = ["Español", "Inglés", "Francés"]
 idioma = "Español"
 
-def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel]):
+def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel],
+                  canvas: customtkinter.CTkCanvas):
     ajustes = customtkinter.CTkToplevel(ventana)
     ajustes.title(TRADUCCIONES[idioma]["titulo_ajustes"])
     ajustes.focus_force() # Hace que la ventana de ajustes esté por arriba
@@ -88,7 +89,7 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     modo = True if customtkinter.get_appearance_mode() == "Dark" else False
     switch_var = customtkinter.BooleanVar(value=modo) 
     texto = "🌙" if modo else "☀️"
-    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
+    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro, canvas), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
     modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
     
     
@@ -123,11 +124,13 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value, fuentes))
     selecc_tamaño.grid(row=5, column=0, padx=2, pady=(0,10), sticky="ew")
     
-def cambio_switch(switch):
+def cambio_switch(switch, canvas: customtkinter.CTkCanvas):
     if (switch.get() == 0):
+        canvas.configure(background="gray92")
         customtkinter.set_appearance_mode("Light")
         switch.configure(text="☀️")
     else:
+        canvas.configure(background="gray14")
         customtkinter.set_appearance_mode("Dark") 
         switch.configure(text="🌙")
 

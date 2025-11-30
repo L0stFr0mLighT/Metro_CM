@@ -1,73 +1,17 @@
 import customtkinter
 from motor.mapa import Mapa
 from PIL import ImageTk
-from common.estacion import Estacion
-
+from idioma import TRADUCCIONES, IDIOMAS, get_resumen, get_texto_detalle
+from common.estacion import Estacion, Linea
 
 # Diccionario con todos los textos de la interfaz según el idioma seleccionado.
 # Cada clave principal es un idioma, y dentro hay las traducciones de cada etiqueta.
-TRADUCCIONES = {
-    "Español": {
-        "idiomas": ["Español", "Inglés", "Francés"],
-        "titulo_ajustes": "Ajustes",
-        "apariencia": "Apariencia",
-        "etiq_origen": "Origen",
-        "etiq_destino": "Destino",
-        "etiq_Salida": "Hora de salida (HH:MM):",
-        "etiq_Preferencias": "Preferencias de viaje:",
-        "opcion1": "Menos trasbordos",
-        "opcion2": "Baja Movilidad",
-        "resultado": "Ruta óptima",
-        "inicio": "Inicio",
-        "ajustes": "Ajustes",
-        "acercaDe": "Acerca de",
-        "cerrar": "Cerrar",
-        "formatoLetra": "Formato de letra:",
-        "idioma": "Idioma:"
-    },
-    "Inglés": {
-        "idiomas": ["Spanish", "English", "French"],
-        "titulo_ajustes": "Settings",
-        "apariencia": "Appearance",
-        "etiq_origen": "Beginning",
-        "etiq_destino": "Destination",
-        "etiq_Salida": "Departure time (HH:MM):",
-        "etiq_Preferencias": "Travel preferences:",
-        "opcion1": "Fewer transfers",
-        "opcion2": "Low mobility",
-        "resultado": "Optimal route",
-        "inicio": "Start",
-        "ajustes": "Settings",
-        "acercaDe": "About",
-        "cerrar": "Close",
-        "formatoLetra": "Font format:",
-        "idioma": "Language:",
-    },
-    "Francés": {
-        "idiomas": ["Espagnol", "Anglais", "Français"],
-        "titulo_ajustes": "Paramètres",
-        "apariencia": "Apparence",
-        "etiq_origen": "Origine",
-        "etiq_destino": "Destination",
-        "etiq_Salida": "Heure de départ (HH:MM):",
-        "etiq_Preferencias": "Préférences de voyage:",
-        "opcion1": "Moins de transferts",
-        "opcion2": "Mobilité réduite",
-        "resultado": "Itinéraire optimale",
-        "inicio": "Commencer",
-        "ajustes": "Ajustements",
-        "acercaDe": "À propos de",
-        "cerrar": "Fermer",
-        "formatoLetra": "Police format:",
-        "idioma": "Langue:",
-    }
-}
 
-IDIOMAS = ["Español", "Inglés", "Francés"]
 idioma = "Español"
 
 def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel],
-                  canvas: customtkinter.CTkCanvas, mapa: Mapa, camino_anim: list[Estacion], RES: tuple[int, int]):
+                  canvas: customtkinter.CTkCanvas, mapa: Mapa, camino_anim: list[Estacion], RES: tuple[int, int], 
+                  tiempo_total: tuple[str, str], hora_estimada: tuple[str, str], principales: list[tuple[Estacion, Linea | None]]):
     """
     Crea y muestra una ventana de ajustes sobre la ventana principal,
     desde la que se puede cambiar tema, idioma y tipografía.
@@ -87,7 +31,6 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     tab_actual = tabs.tab(apariencia_name)  # Contenedor interno de la pestaña
     tabs.pack(fill="both", expand=True, padx=5, pady=10)
     tabs.tab(apariencia_name).grid_columnconfigure((0,1), weight=1)
-    #TODO tabs.tab(apariencia_name).grid_rowconfigure((0,1,2,3,4,5), weight=1)
     
     # Cálculo del tamaño y centrado de la ventana de ajustes respecto a la principal
     w_root = ventana.winfo_width()  
@@ -128,7 +71,8 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
                                                    font=fuentes[0], variable=idioma_var) 
     # Cuando se haga clic en un idioma, se llama a cambio_idioma(...)
     idiomaBoton.configure(command=lambda value: cambio_idioma(ajustes, tabs, idiomaBoton, 
-                                                            idiomaBoton.cget("values").index(idiomaBoton.get()), labels))
+                                                            idiomaBoton.cget("values").index(idiomaBoton.get()), labels, 
+                                                            tiempo_total=tiempo_total, hora_estimada=hora_estimada, principales=principales))
     idiomaBoton.grid(row=2, column=0, padx=2, pady=(0,20), sticky="ew")
     
     # --- Selector de tipografía (familia de fuente) ---
@@ -171,7 +115,8 @@ def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCan
 
 def cambio_idioma(ajustes : customtkinter.CTkToplevel , tabs : customtkinter.CTkTabview, 
                   idiomaBoton : customtkinter.CTkSegmentedButton, idioma_new_pos : int, 
-                  labels : list [customtkinter.CTkLabel]):
+                  labels : list [customtkinter.CTkLabel], tiempo_total: tuple[str, str], hora_estimada: tuple[str, str], 
+                  principales: list[tuple[Estacion, Linea | None]]):
     """
     Cambia el idioma de la ventana de ajustes y actualiza las etiquetas
     de la ventana principal.
@@ -194,11 +139,20 @@ def cambio_idioma(ajustes : customtkinter.CTkToplevel , tabs : customtkinter.CTk
     # Actualizar los textos de los labels de la ventana principal
     i = 0
     for key in TRADUCCIONES[idioma]:
-            if key not in ["idiomas", "titulo_ajustes", "apariencia"]:
+            if key not in ["idiomas", "titulo_ajustes", "apariencia","detalles origen == destino", 
+                           "detallesPrimerTramo", "resumen", "detallesSigue", "detallesTransbordo", "detallesLlegada","formatoLetra","idioma"]:
+                label = labels[i].cget("text")
+                x = TRADUCCIONES[idioma][key]
                 labels[i].configure(text=TRADUCCIONES[idioma][key])
                 i += 1
+    labels[-1].configure(text=TRADUCCIONES[idioma]["idioma"])
+    labels[-2].configure(text=TRADUCCIONES[idioma]["formatoLetra"])
     
-
+    text= get_resumen(principales=principales, tiempo_total=tiempo_total, hora_estimada=hora_estimada, idioma=idioma)         
+    labels[-3].configure(text=text)
+    text= get_texto_detalle(principales=principales, idioma=idioma)         
+    labels[-4].configure(text=text)
+    
 def cambio_tipografia(tipografia, fuentes: list[customtkinter.CTkFont]):
     """
     Cambia la familia tipográfica (fuente) de todas las fuentes usadas en la interfaz.
@@ -215,3 +169,10 @@ def cambio_tamaño_tipografia(tamaño, fuentes: list[customtkinter.CTkFont]):
     # La segunda fuente, si se usa para títulos, se hace algo más grande
     fuentes[1].configure(size=int(tamaño)+15)
     fuentes[3].configure(size=int(tamaño) - 2)
+
+def get_idioma():
+    """
+    Devuelve el idioma actual de la aplicación.
+    """
+    global idioma
+    return idioma

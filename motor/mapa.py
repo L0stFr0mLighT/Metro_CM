@@ -10,8 +10,10 @@ from customtkinter import CTkCanvas
 
 FACTOR_ESCALA = 1.25
 
-#Dibujo de Cairo a PIL
 def to_pil(surface: ImageSurface) -> Image.Image:
+    """
+    Convierte una superficie de Cairo a una imagen de PIL
+    """
     size = (surface.get_width(), surface.get_height())
     stride = surface.get_stride()
 
@@ -30,13 +32,14 @@ class Mapa:
     estaciones: dict[str, Estacion] = field(default_factory=dict)
     lineas: list[Linea] = field(default_factory=list)
     # (Estacion, Linea) -> ((Estacion, tiempo), (Estacion, tiempo) | None) 
-    # Si es cabecera, el segundo elemento es None
+    # Si es Estacion es cabecera de una linea, el segundo elemento es None
     adyacentes: dict[tuple[Estacion, Linea], tuple[tuple[Estacion, float], tuple[Estacion, float] | None]] \
         = field(default_factory=dict)
     # (Estacion_origen, Estacion_dest) -> (Linea, tiempo)
     conexion: dict[tuple[Estacion, Estacion], tuple[Linea, float]] = field(default_factory=dict)
     transbordos: list[Transbordo] = field(default_factory=list)
     
+    # Atributos internos para el dibujo
     _mapa_actual: ImageSurface | None = field(default_factory=lambda : None)
     _ctx: Context | None = field(default_factory=lambda : None)
     _id_curva_recorrido: int | None = field(default_factory=lambda : None)
@@ -136,12 +139,11 @@ class Mapa:
             self._ctx.close_path()
             self._ctx.set_source_rgba(linea.color[0], linea.color[1], linea.color[2])
             self._ctx.fill()
-            # Dibujo el borde negro para el cuadrado del número de línea
+            # Dibujar el borde negro para el cuadrado del número de línea
             self._ctx.set_line_width(0.002)
             roundRect.roundrect(self._ctx, linea.pos_cuadrado[0], linea.pos_cuadrado[1], lado, lado, 0.01)
             self._ctx.set_source_rgba(0, 0, 0)
             self._ctx.stroke()
-            
             # Dibujar número centrado dentro del cuadrado
             self._ctx.set_source_rgba(1, 1, 1) #Color blanco
             self._ctx.select_font_face("Arial", 0, cairo.FONT_WEIGHT_BOLD)
@@ -209,9 +211,17 @@ class Mapa:
     def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
                                          step: float, canvas: CTkCanvas | None) -> bool:
         """
-        Dibuja el mapa con el recorrido en el canvas dado con el paso dado. 
-        Si no se ha dibujado el mapa previamente, lo crea
-        Si tienes que continuar, devuelve True
+        Dibuja en el canvas el recorrido del tren hasta el punto indicado por 'step'.
+
+        Si el mapa aún no ha sido dibujado previamente, lo crea primero.
+
+        Cada llamada redibuja la parte del recorrido visible hasta 'step',
+        incluyendo los tramos completos y el tramo parcial donde se encuentra el tren.
+
+        Devuelve:
+            - True  → si el recorrido aún no ha terminado y deben seguir llamándose
+                    más pasos de animación.
+            - False → si el recorrido ya está completado.
         """
         COLOR_REC = "red"
         if self._mapa_actual == None:
@@ -230,15 +240,25 @@ class Mapa:
             v2 = par_estaciones[1].pos_mapa
             
             if step == 0: 
+                #
                 self._curva_recorrido = [escalar(res_x, res_y, v1[0], v1[1])]
                 self._primer_render = True
                 break
 
             if i < step and step <= i + 1:
+
                 # Calculamos vector director
+                
+                # Ejemplo:
+                # v1 = (10, 10)
+                # v2 = (20, 20)
+                # step = 1.5, i = 1 → porcentaje = 0.5
+                # pos_final = (10 + 0.5*(10), 10 + 0.5*(10)) = (15, 15)
+                
                 director = (v2[0] - v1[0], v2[1] - v1[1])
                 director_pintado = ((step - i) * director[0], (step - i) * director[1])
                 pos_final_pintado = (v1[0] + director_pintado[0], v1[1] + director_pintado[1])
+                
                 # Pintamos la parte proporcional
                 self._curva_recorrido.append(escalar(res_x, res_y, pos_final_pintado[0], pos_final_pintado[1]))
 
@@ -252,6 +272,7 @@ class Mapa:
                                                               fill=COLOR_REC)
                 self._primer_render = False
             else:
+                # Actualizamos la curva en el canvas para que pasa por los nuevos puntos
                 canvas.coords(self._id_curva_recorrido, *self._curva_recorrido)
 
             # Dibujar los puntos de las estaciones
@@ -260,6 +281,7 @@ class Mapa:
             crear_circulo(*escalar(res_x, res_y, v1[0], v1[1]), int(0.004 * FACTOR_ESCALA * res_x),
                           canvas, fill="white")
 
+            #Evito que el tren avance más allá del paso actual
             if i < step and step <= i + 1:
                 break
             pass # for i in range(len(recorrido) - 1)

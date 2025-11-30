@@ -20,33 +20,55 @@ customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark
 
 # TODO
 def buscar_rutas():
+    """
+    Llama al motor de rutas (A*), calcula el tiempo estimado del trayecto
+    y lanza la animación del recorrido en el mapa.
+    """
     global step, camino_animar, tiempo_inicio, id_linea
+
+
     mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
 
     origen_text = origen.get()
     destino_text = destino.get()
     menos_trasbordos = opcion1.get()
-    baja_movilidad = opcion2.get()
+    baja_movilidad = opcion2.get() #TODO De momento no usado
     hora_salida = entry_hora.get()
     min_salida = entry_min.get()
 
+    # Si falta origen o destino, no hacemos nada
+    if not origen_text or not destino_text:
+        print("WARN: Origen o destino vacío")
+        return
+
+    # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
-    if camino == None:
+    if camino is None:
         # TODO: Indicar que no hay camino
-        print("ERROR: No hay camino")
+        print("ERROR: No hay camino entre esas estaciones")
+        return 
     # TODO: Mostrar el camino
+    # Calcula el tiempo total del camino en minutos
     tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
     
+    # Suma el tiempo de viaje a la hora de salida para obtener la hora estimada de llegada
     hora_estimada = sumar_minutos(hora_salida, min_salida, tiempo_camino)
     print("WARN: Hora estimada: {}".format(hora_estimada))
 
-    # Animar el mapa
+    # Prepara el camino para la animación:
+    # camino es una lista de tuplas (Estacion, Linea), nos quedamos solo con las Estaciones
     camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
+
+    # Limpia el canvas y vuelve a dibujar el mapa base de fondo
     mapa_canvas.delete("all")
     mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
+
+    # Inicializa variables de animación
     tiempo_inicio = 0
     step = 0
     camino_animar = camino_dedup
+
+    # Lanza la animación
     animar()
 
 id_linea = 0
@@ -54,17 +76,29 @@ step = 0
 camino_animar = list()
 coordenadas = [(0, 0)]
 DIRECTOR = (5, 5)
+
 def animar():
+    """
+    Función recursiva (llamada periódicamente con after) que anima el recorrido
+    del tren sobre el mapa, avanzando el parámetro 'step' poco a poco.
+    """
     global mapaLabel, ventana, imagen_mapa_tk, tiempo_inicio, step, camino_animar, coordenadas
-    PASO = 0.5
-    PERIODO = 20
+    PASO = 0.5      # Cuanto avanza el tren en cada frame
+    PERIODO = 20    # Tiempo (ms) entre frames
+
+    # Pinta el recorrido hasta el punto indicado por 'step'
     continuar = mapa.dibujar_estaciones_con_recorrido(RES_MAPA_X, RES_MAPA_Y, camino_animar, step, mapa_canvas)
+    
+    # Si todavía no ha llegado al final, incrementa step y reprograma la siguiente llamada
     if continuar:
         step = step + PASO
         mapa_canvas.after(PERIODO, animar)
 
-# Funcion que permite escribir hora con formato correcto
 def character_limit_hour(entry_text):
+    """
+    Controla que el valor de la hora introducida sea válido (00–23).
+    Se ejecuta cada vez que el usuario escribe en el campo de hora.
+    """
     if len(entry_text.get()) > 0:
         primerCar = entry_text.get()[0]     # Coge el primer numero
         segundoCar = entry_text.get()[1:2]  # Coge el segundo numero
@@ -75,10 +109,13 @@ def character_limit_hour(entry_text):
         elif segundoCar not in {"0", "1", "2", "3", "4", "5", "6","7","8","9"}:
             entry_text.set(primerCar)
         else:
-          entry_text.set(entry_text.get()[:2])
- 
-# Funcion que permite escribir minuto con formato correcto    
+            entry_text.set(entry_text.get()[:2])
+   
 def character_limit_min(entry_text):
+    """
+    Controla que el valor de minutos introducido sea válido (00–59).
+    Se ejecuta cada vez que el usuario escribe en el campo de minutos.
+    """
     if len(entry_text.get()) > 0:
         primerCar = entry_text.get()[0]
         segundoCar = entry_text.get()[1:2]
@@ -89,52 +126,75 @@ def character_limit_min(entry_text):
         else:
             entry_text.set(entry_text.get()[:2])
 
-def button_callback(hora, min, paso, modo):
-    if modo:
-        value = float(hora.get()) + paso
-        if len(hora.get()) == 1:
-            hora.set("0" + str(value))
-        elif value >= 24:
-            hora.set("00")
-        else:
-            hora.set(value % 24)
-    else:
-        value = float(min.get()) + paso
-        if len(min.get()) == 1:
-            min.set("0" + str(value))
-        elif value >= 60:
-            min.set("00")
-            hora.set((hora.get()+ 1) % 24)
-        elif value < 0:
-            min.set("55")
-            hora.set((hora.get()- 1) % 24)
-        else:
-            min.set(value)  
+#TODO: esto sobra?
+# def button_callback(hora, min, paso, modo):
+#     if modo:
+#         value = float(hora.get()) + paso
+#         if len(hora.get()) == 1:
+#             hora.set("0" + str(value))
+#         elif value >= 24:
+#             hora.set("00")
+#         else:
+#             hora.set(value % 24)
+#     else:
+#         value = float(min.get()) + paso
+#         if len(min.get()) == 1:
+#             min.set("0" + str(value))
+#         elif value >= 60:
+#             min.set("00")
+#             hora.set((hora.get()+ 1) % 24)
+#         elif value < 0:
+#             min.set("55")
+#             hora.set((hora.get()- 1) % 24)
+#         else:
+#             min.set(value)  
             
 def hora_button_callback(entry_hora, entry_min, paso):
+    """
+    Suma o resta 'paso' horas a la hora actual, respetando el formato HH
+    y el ciclo de 24 horas.
+    """
     (hora, min)= sumar_hora(entry_hora.get(), entry_min.get(), paso)
     entry_hora.set(hora)
     entry_min.set(min)
 
 def min_button_callback(entry_hora, entry_min, paso):
+    """
+    Suma o resta 'paso' minutos a la hora actual, ajustando también la hora
+    si hay desbordamiento por arriba o por abajo.
+    """
     (hora, min)= sumar_minutos(entry_hora.get(), entry_min.get(), paso)
     entry_hora.set(hora)
     entry_min.set(min)
                 
 def cambio_ventana(tab):
+    """
+    Cambia entre las distintas vistas de la interfaz:
+        - "programa": vista principal con formulario + mapa.
+        - "about": vista 'Acerca de'.
+        - "inicio": menú inicial.
+    """
     match tab:
         case "programa":
+            # Oculta la pantalla de inicio y muestra programa + mapa
             frame_inicio.grid_forget()
-            ventana.grid_rowconfigure(1, weight=0)
             ventana.grid_columnconfigure(1, weight=1)
+
             frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
             frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+
             botonAjustesTitulo.grid(row=0, column=2, padx=10, pady=10, sticky="e") 
-            botonVolverTitulo.grid(row=0,column=3, padx=10, pady= 10, sticky= "e")           
+            botonVolverTitulo.grid(row=0, column=3, padx=10, pady=10, sticky="e")           
         case "about":
+            # Oculta el inicio y muestra la ventana 'Acerca de'
             frame_inicio.grid_forget()
+            frameTexto.grid_forget()
+            frameMapa.grid_forget()
+            botonAjustesTitulo.grid_forget()
+            botonVolverTitulo.grid_forget()
             frameAbout.grid(row=1,column=0)
         case "inicio":
+            # Vuelve al menú de inicio
             frameTexto.grid_forget()
             frameMapa.grid_forget()
             frameAbout.grid_forget()
@@ -142,35 +202,42 @@ def cambio_ventana(tab):
             botonVolverTitulo.grid_forget()
             ventana.grid_rowconfigure(1, weight=1)
             ventana.grid_columnconfigure(1, weight=0)
-            frame_inicio.grid(row=1, column=0) 
+            frame_inicio.grid(row=1, column=0)
 
-# -----------------
-# Ventana principal
-# -----------------
+# ----------------------------
+# Ventana principal y fuentes
+# ----------------------------
 ventana = customtkinter.CTk()
 
+# Tamaño a pantalla completa (en píxeles)
 ventana.geometry("{0}x{1}+0+0".format(ventana.winfo_screenwidth(), ventana.winfo_screenheight()))
-# ventana.geometry("1920x1080+0+0") 
-#ventana.after(0, lambda: ventana.state("zoomed")) # solo funciona en Windows
+#TODO ventana.geometry("1920x1080+0+0") sobra? 
+#TODO ventana.after(0, lambda: ventana.state("zoomed")) sobra? 
 ventana.iconbitmap(path.join(path.dirname(__file__), 'Imagenes/Logo_metro.ico'))
 ventana.title("Metro Ciudad de Mexico")
 ventana.minsize(1400,750)
 ventana.grid_columnconfigure(0, weight=1)
 ventana.grid_rowconfigure(1, weight=1)
-# ventana.grid_rowconfigure(0, weight=1)
 
+# Fuentes base de la interfaz
 fuente_base = customtkinter.CTkFont(family="Roboto", size=16, weight="normal") # Fuente base para los textos
 fuente_subtitulo = customtkinter.CTkFont(family= "Roboto", size=30, weight="normal")
 fuente_titulo = customtkinter.CTkFont(family="Roboto", size= 40, weight="bold")
-estaciones_names = [e.nombre for e in ESTACIONES] # Lista con los nombres de las estaciones
-estaciones_names.sort() # Ordena las estaciones alfabeticamente
 
-# ------------
-# Frame inicio
-# ------------
+# Lista de nombres de estaciones ordenada alfabéticamente para los combobox
+estaciones_names = [e.nombre for e in ESTACIONES]
+estaciones_names.sort()
+
+# -----------------------------
+# Frame inicio (menú principal)
+# -----------------------------
+
+# Frame con el menú de inicio (botón de iniciar, ajustes, acerca de, cerrar)
 frame_inicio = customtkinter.CTkFrame(ventana, fg_color="transparent")
 frame_inicio.grid(row=1, column=0, sticky="we")
 frame_inicio.grid_columnconfigure(0, weight=1)
+
+# Botón de "Inicio" con icono de play
 play_image = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_light.png")).resize((50, 50)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/play_dark.png")).resize((50, 50)), size=(50, 50)) # Botón inicio
 boton_inicio = customtkinter.CTkButton(frame_inicio, image=play_image, text="Inicio", width=300, font=fuente_titulo, command= lambda : cambio_ventana("programa"))
@@ -204,9 +271,9 @@ botonVolverAbout.grid(row=1,column=0)
 label_nombres = customtkinter.CTkLabel(frameAbout, font=fuente_base, text="Programa creado por:\n\nPablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
 label_nombres.grid(row=0, column=0, padx=10, pady=10, sticky="sw")
 
-# ------------------------
-# Frame Titulo 
-# ------------------------
+# -----------------------------
+# Frame Titulo (barra superior)
+# -----------------------------
 frameTitulo = customtkinter.CTkFrame(ventana, fg_color=("white", "grey10"))
 frameTitulo.grid(row=0, column=0, columnspan =2, sticky="ew", padx = 20, pady = 20)
 frameTitulo.grid_columnconfigure(2, weight=1)
@@ -217,26 +284,27 @@ labelLogo.grid(row=0, column=0, padx = 20)
 labelTitulo = customtkinter.CTkLabel(frameTitulo, text= "Metro Ciudad de México", font= fuente_titulo)
 labelTitulo.grid(row=0,column=1)
 
-
+# Botón ajustes en la barra superior (se muestra solo en modo "programa")
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
                                        command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
                                                                         labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma]))
 
+# Botón volver en la barra superior (se muestra solo en modo "programa")
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_dark.png")).resize((25, 25)), size=(25, 25))
 botonVolverTitulo = customtkinter.CTkButton(frameTitulo ,image=volver_imagen, text="", width=30, height=30, corner_radius=10, command=lambda: cambio_ventana("inicio"))
     
-    # ------------------------
-    # Frame izquierdo (texto)
-    # ------------------------
+# -----------------------------------
+# Frame izquierdo: formulario (texto)
+# -----------------------------------
 frameTexto = customtkinter.CTkFrame(ventana, fg_color=("grey80", "grey19")) # TODO:Color Provisional 
 frameTexto.grid_columnconfigure((0,1), weight=1)
 frameTexto.grid_rowconfigure(3, weight=1)
 # frameTexto.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
 
-    # -------------------------
-    # Frame origen y destino
-    # -------------------------
+# -------------------------
+# Frame origen y destino
+# -------------------------
 frameOrigen_Destino = customtkinter.CTkFrame(frameTexto, fg_color= "transparent", corner_radius=6)
 frameOrigen_Destino.grid_columnconfigure((0,1), weight=1)
 frameOrigen_Destino.grid(row=0, column=0, sticky="nsew", columnspan= 2, pady=10, padx=1)
@@ -264,9 +332,9 @@ lupa_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirna
 botonBuscar = customtkinter.CTkButton(frameOrigen_Destino, command=buscar_rutas, image=lupa_imagen, text="", width=50, height=50, corner_radius=10)
 botonBuscar.grid(row=0, column=2, rowspan=2, padx=10)
 
-    # -------------------
-    # Frame entrada hora
-    # -------------------
+# -------------------
+# Frame entrada hora
+# -------------------
 frameEntryTiempo = customtkinter.CTkFrame(frameTexto, fg_color= "transparent")
 frameEntryTiempo.grid_columnconfigure((0,2), weight=1)
 frameEntryTiempo.grid(row=1, column=0, sticky="wns", pady=10, padx=1)
@@ -298,9 +366,9 @@ minuto = customtkinter.CTkEntry(frameEntryTiempo,width=50, height=20, textvariab
 minuto.grid(row=2, column=2, sticky="w", padx=5)
 entry_min.trace("w", lambda *args: character_limit_min(entry_min))
 
-    # --------------------
-    # Frame Preferencias
-    # --------------------
+# --------------------
+# Frame Preferencias
+# --------------------
 framePreferencias = customtkinter.CTkFrame(frameTexto, fg_color="transparent")
 framePreferencias.grid_columnconfigure(0, weight=1)
 framePreferencias.grid(row=1, column=1, sticky="nsew", pady=10, padx=1)
@@ -312,10 +380,10 @@ opcion1.grid(row=1, column=0, pady=(10,5), sticky="w")
 opcion2 = customtkinter.CTkCheckBox(framePreferencias, text="Baja Movilidad", font=fuente_base)
 opcion2.grid(row=2, column=0, pady=5, sticky="w")
 
-    #TODO: Imprimir imprimir busqueda en el frame resultado
-    # ----------------
-    # Frame resultado
-    # ----------------
+#TODO: Imprimir imprimir busqueda en el frame resultado
+# ----------------
+# Frame resultado
+# ----------------
 frameResultado = customtkinter.CTkFrame(frameTexto, border_width=2, fg_color="transparent", border_color=("black", "white"))
 frameResultado.grid_columnconfigure(0, weight=1)
 frameResultado.grid(row=3, column=0, columnspan=2, sticky="nsew", pady=10, padx=10)

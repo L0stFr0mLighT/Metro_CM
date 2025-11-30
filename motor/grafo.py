@@ -12,8 +12,6 @@ class Grafo:
 
     Los vertices del grafo seran tuplas de la forma (Estacion, Linea | None)
     Si el segundo miembro de la tupla es None, simboliza la entrada de la estacion.
-    Esto es util para las estaciones con transbordo, que no sabemos si el usuario esta
-    en (est, L_1) o en (est, L_3), por ejemplo.
 
     Las aristas son las conexiones entre estaciones a traves de una linea.
     """
@@ -26,15 +24,16 @@ class Grafo:
 
     def set_grafo(self, conexiones: list[Conexion], transbordos: list[Transbordo], mapa: Mapa):
 
-        # CONTEXTO: para resolver el problema de conocer en que linea exacta de una estacion empezamos,
-        # creamos un nodo extra para cada estacion (estacion general), que simboliza la entrada a la estacion.
-        # Desde este nodo, se puede ir a cualquier linea que pase por la estacion sin coste 
+        # CONTEXTO: para resolver el problema de determinar en qué línea exacta de una
+        # estación con transbordos debemos comenzar, creamos un nodo adicional para cada
+        # estación (estación general), que representa la entrada a dicha estación.
+        # Desde este nodo se puede acceder a cualquier línea que pase por la estación sin coste. 
         
         self.mapa = mapa
         for conexion in conexiones:
+
             # Añado las estaciones "generales"
             self.grafo.add_edge((conexion.origen, None), (conexion.origen, conexion.linea))
-
             self.grafo.add_edge((conexion.dest, None), (conexion.dest, conexion.linea))
 
             self.grafo.add_edge((conexion.origen, conexion.linea), (conexion.dest, conexion.linea))
@@ -53,7 +52,7 @@ class Grafo:
             assert cnx_dest[1] != None
             return 0 + cnx_dest[1].frecuencia / 2   # Empiezas el viaje
         
-        # Salida de la línea solo en la estación destino
+        # Salida a la entrada de estacion (solo en la estación destino)
         if cnx_dest[1] == None:
             if cnx_dest[0] == self.destino_actual:
                 return 0

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 @dataclass(eq=True, frozen=True)
 class Estacion:
@@ -7,6 +7,9 @@ class Estacion:
     """
     nombre: str
     pos_mapa: tuple[float, float]
+    localizacion: tuple[float, float]
+    pos_nombre: tuple[float, float]
+    color: tuple[float, float, float] = (0.0, 0.0, 0.0)
     # TODO: Añadir mas informacion si es necesario
 
 @dataclass(eq=True, frozen=True)
@@ -17,10 +20,14 @@ class Linea:
     numero: int
     cabeceras: tuple[Estacion, Estacion]
     color: tuple[float, float, float]
+    pos_cuadrado: tuple[float, float]
+    frecuencia: float
 
     @classmethod
-    def crear_linea(cls, numero: int,cabeceras: tuple[Estacion, Estacion], color: tuple[float, float, float]) -> 'Linea':
-        return Linea(numero, cabeceras, (color[0] / 255, color[1] / 255, color[2] / 255))
+    def crear_linea(cls, numero: int,cabeceras: tuple[Estacion, Estacion], 
+                    color: tuple[float, float, float], pos_cuadrado: tuple[float, float],
+                    frecuencia: float) -> 'Linea':
+        return Linea(numero, cabeceras, (color[0] / 255, color[1] / 255, color[2] / 255), pos_cuadrado, frecuencia)
 
 @dataclass
 class Conexion:
@@ -36,9 +43,6 @@ class Conexion:
 
     def simetrico(self) -> 'Conexion':
         return Conexion(self.dest, self.origen, self.linea, self.tiempo)
-
-    def set_tiempo(self, tiempo: float):
-        self.tiempo = tiempo
 
 @dataclass
 class Transbordo:

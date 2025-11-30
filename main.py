@@ -24,9 +24,7 @@ def buscar_rutas():
     Llama al motor de rutas (A*), calcula el tiempo estimado del trayecto
     y lanza la animación del recorrido en el mapa.
     """
-    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk
-
-    imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
+    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk, estaciones_names
 
     origen_text = origen.get()
     destino_text = destino.get()
@@ -36,10 +34,10 @@ def buscar_rutas():
     min_salida = entry_min.get()
 
     # Si falta origen o destino, no hacemos nada
-    if not origen_text or not destino_text:
+    if origen_text not in estaciones_names or destino_text not in estaciones_names:
         print("WARN: Origen o destino vacío")
         return
-
+    
     # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
     if camino is None:
@@ -47,6 +45,7 @@ def buscar_rutas():
         print("ERROR: No hay camino entre esas estaciones")
         return 
     # TODO: Mostrar el camino
+    
     # Calcula el tiempo total del camino en minutos
     tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
     
@@ -59,6 +58,7 @@ def buscar_rutas():
     camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
 
     # Limpia el canvas y vuelve a dibujar el mapa base de fondo
+    imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
     mapa_canvas.delete("all")
     mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 

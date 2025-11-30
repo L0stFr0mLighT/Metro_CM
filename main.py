@@ -56,7 +56,7 @@ def buscar_rutas():
     # Prepara el camino para la animación:
     # camino es una lista de tuplas (Estacion, Linea), nos quedamos solo con las Estaciones
     camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
-
+    
     # Limpia el canvas y vuelve a dibujar el mapa base de fondo
     imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
     mapa_canvas.delete("all")
@@ -124,30 +124,7 @@ def character_limit_min(entry_text):
             entry_text.set(primerCar)
         else:
             entry_text.set(entry_text.get()[:2])
-
-#TODO: esto sobra?
-# def button_callback(hora, min, paso, modo):
-#     if modo:
-#         value = float(hora.get()) + paso
-#         if len(hora.get()) == 1:
-#             hora.set("0" + str(value))
-#         elif value >= 24:
-#             hora.set("00")
-#         else:
-#             hora.set(value % 24)
-#     else:
-#         value = float(min.get()) + paso
-#         if len(min.get()) == 1:
-#             min.set("0" + str(value))
-#         elif value >= 60:
-#             min.set("00")
-#             hora.set((hora.get()+ 1) % 24)
-#         elif value < 0:
-#             min.set("55")
-#             hora.set((hora.get()- 1) % 24)
-#         else:
-#             min.set(value)  
-            
+      
 def hora_button_callback(entry_hora, entry_min, paso):
     """
     Suma o resta 'paso' horas a la hora actual, respetando el formato HH
@@ -210,8 +187,6 @@ ventana = customtkinter.CTk()
 
 # Tamaño a pantalla completa (en píxeles)
 ventana.geometry("{0}x{1}+0+0".format(ventana.winfo_screenwidth(), ventana.winfo_screenheight()))
-#TODO ventana.geometry("1920x1080+0+0") sobra? 
-#TODO ventana.after(0, lambda: ventana.state("zoomed")) sobra? 
 ventana.iconbitmap(path.join(path.dirname(__file__), 'Imagenes/Logo_metro.ico'))
 ventana.title("Metro Ciudad de Mexico")
 ventana.minsize(1400,750)
@@ -315,17 +290,13 @@ etiqOrigen.grid(row=0, column=0, padx=(0,18), sticky="ew")
 etiqDestino = customtkinter.CTkLabel(frameOrigen_Destino, text="Destino", font=fuente_base, corner_radius=6)
 etiqDestino.grid(row=0, column=1, padx=(0,18), sticky="ew")  
 
-# TODO: No cambiar tamaño al cambiar la opcion. Mirar con combo box o scrollable frame + radio buttons
+
 origen = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
 CTkScrollableDropdown(origen, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=False)
-# TODO: a lo mejor queda mejor con:
-# origen.grid(row=1, column=0, padx= 10, sticky="ew")
 origen.grid(row=1, column=0)
 
 destino = customtkinter.CTkComboBox(frameOrigen_Destino, font=fuente_base, justify="center", width=225)
 CTkScrollableDropdown(destino, values=estaciones_names, autocomplete=True, scrollbar=False, double_click=False)
-# TODO: a lo mejor queda mejor con:
-# destino.grid(row=1, column=1, padx= 10, sticky="ew")
 destino.grid(row=1, column=1)
 
 lupa_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/lupa_light.png")).resize((25, 25)),
@@ -403,7 +374,6 @@ frameMapa.grid_rowconfigure(0, weight=1)
 color_canvas = "grey14" if customtkinter.get_appearance_mode() == "Dark" else "grey92"
 
 imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
-# TODO: El color de fondo depende del modo de la apariencia
 mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(), width=imagen_mapa_tk.width(), highlightthickness=0, background=color_canvas)
 mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 mapa_canvas.grid(row=0, column=0, sticky="nsew")

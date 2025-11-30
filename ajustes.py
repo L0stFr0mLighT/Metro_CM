@@ -194,7 +194,7 @@ def cambio_idioma(ajustes : customtkinter.CTkToplevel , tabs : customtkinter.CTk
                 labels[i].configure(text=TRADUCCIONES[idioma][key])
                 i += 1
     
-# TODO
+
 def cambio_tipografia(tipografia, fuentes: list[customtkinter.CTkFont]):
     """
     Cambia la familia tipográfica (fuente) de todas las fuentes usadas en la interfaz.
@@ -202,7 +202,7 @@ def cambio_tipografia(tipografia, fuentes: list[customtkinter.CTkFont]):
     for fuente in fuentes:
         fuente.configure(family=tipografia)
         
-# TODO
+
 def cambio_tamaño_tipografia(tamaño, fuentes: list[customtkinter.CTkFont]):
     """
     Cambia el tamaño de la tipografía principal y, si existe, de una fuente secundaria.

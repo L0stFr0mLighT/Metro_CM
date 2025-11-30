@@ -210,3 +210,4 @@ def cambio_tamaño_tipografia(tamaño, fuentes: list[customtkinter.CTkFont]):
     fuentes[0].configure(size=int(tamaño))
     # La segunda fuente, si se usa para títulos, se hace algo más grande
     fuentes[1].configure(size=int(tamaño)+15)
+    fuentes[3].configure(size=int(tamaño) - 2)

@@ -7,7 +7,10 @@ from tiempo.tiempo import sumar_hora, sumar_minutos
 from CTkScrollableDropdown import CTkScrollableDropdown
 from os import path
 from ajustes import *
+from ajustes import idioma
+from idioma import *
 
+# ----------------------------
 mapa = Mapa()
 mapa.set_mapa(ESTACIONES, LINEAS, CONEXIONES, TRANSBORDOS)
 
@@ -17,6 +20,11 @@ grafo.set_grafo(CONEXIONES, TRANSBORDOS, mapa)
 RES_MAPA_X, RES_MAPA_Y = 700, 700
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+tiempo_total = ["00", "00"]
+hora_estimada = ["00", "00"]
+principales = list()
+
+idioma = get_idioma()
 
 # TODO
 def buscar_rutas():
@@ -24,7 +32,7 @@ def buscar_rutas():
     Llama al motor de rutas (A*), calcula el tiempo estimado del trayecto
     y lanza la animación del recorrido en el mapa.
     """
-    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk, estaciones_names
+    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk, estaciones_names, tiempo_total, hora_estimada
 
     origen_text = origen.get()
     destino_text = destino.get()
@@ -35,23 +43,26 @@ def buscar_rutas():
 
     # Si falta origen o destino, no hacemos nada
     if origen_text not in estaciones_names or destino_text not in estaciones_names:
-        mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
+        mostrar_resultado([], hay_camino=False)
         return
     
     # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
     if camino is None:
-        mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
+        mostrar_resultado([], hay_camino=False)
         return 
 
     # Calcula el tiempo total del camino en minutos
-    tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
-    
+    minutos_camino = round(grafo.calcular_tiempo_camino(camino))
+    tiempo_total = ["00", str(minutos_camino)]
     # Suma el tiempo de viaje a la hora de salida para obtener la hora estimada de llegada
-    hora_estimada = sumar_minutos(hora_salida, min_salida, tiempo_camino)
-
+    if int(hora_salida) >= 0 and int(hora_salida) < 5:
+        diff_hora = 5-int(hora_salida)-1
+        diff_min = diff_hora*60 + 60-int(min_salida)
+        tiempo_total = sumar_minutos("00", str(minutos_camino), diff_min)
+    hora_estimada = sumar_minutos(hora_salida, min_salida, minutos_camino)
     # camino: lista de (Estacion, Linea|None)  -> lo usamos para describir la ruta
-    mostrar_resultado(camino, tiempo_camino, hora_estimada, hay_camino=True)
+    mostrar_resultado(camino,hay_camino=True)
     
     # Prepara el camino para la animación:
     # camino es una lista de tuplas (Estacion, Linea), nos quedamos solo con las Estaciones
@@ -93,111 +104,35 @@ def animar():
         step = step + PASO
         mapa_canvas.after(PERIODO, animar)
 
-def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], 
-                      tiempo_total: int, hora_estimada: tuple[str, str], hay_camino: bool):
-
+def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], hay_camino: bool):
+    global label1, labelResumenTitulo, labelDetalleTitulo, labelResumen, card, tiempo_total, hora_estimada, principales, idioma
     # ----- LIMPIAR CONTENIDO -----
-    for widget in frameResultado.grid_slaves():
+    for widget in card.grid_slaves():
         if widget.grid_info().get("row", 0) != 0: # Mantener el título
-            widget.destroy()
-
-    # ----- TARJETA -----
-    card = customtkinter.CTkFrame(frameResultado, fg_color=("gray90", "gray20"), corner_radius=10)
-    card.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
-    card.grid_columnconfigure(0, weight=1)
+            widget.grid_forget()
 
     # Caso sin ruta
     if not hay_camino or not camino_vertices:
-        customtkinter.CTkLabel(
-            card, 
-            text="No existe ruta entre las estaciones seleccionadas.",
-            font=fuente_base, 
-            anchor="w", 
-            justify="left"
-        ).grid(row=0, column=0, padx=20, pady=20, sticky="w")
+        label1.grid(row=0, column=0, padx=20, pady=20, sticky="w")
         return
 
     # ----- ORIGEN Y DESTINO -----
-    origen_est = camino_vertices[0][0]
-    destino_est = camino_vertices[-1][0]
-
-    # ====== (1) RESUMEN ======
-    resumen = (
-        f"Origen:  {origen_est.nombre}\n"
-        f"Destino: {destino_est.nombre}\n"
-        f"Duración total: {tiempo_total} min\n"
-        f"Llegada estimada: {hora_estimada[0]}:{hora_estimada[1]}"
-    )
-
-    customtkinter.CTkLabel(
-        card,
-        text="Resumen del trayecto",
-        font=customtkinter.CTkFont(size=16, weight="bold"),
-        anchor="w"
-    ).grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
-
-    customtkinter.CTkLabel(
-        card,
-        text=resumen,
-        font=fuente_resultado,
-        anchor="w",
-        justify="left"
-    ).grid(row=1, column=0, padx=25, pady=(0, 15), sticky="w")
-
-    # ====== (2) DETALLE USANDO estaciones_principales ======
     principales = grafo.estaciones_principales(camino_vertices)
 
-    customtkinter.CTkLabel(
-        card,
-        text="Detalle del recorrido",
-        font=customtkinter.CTkFont(size=16, weight="bold"),
-        anchor="w"
-    ).grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
+    idioma = get_idioma()
+      
+    # ====== (2) DETALLE  ======
+    texto_detalle = get_texto_detalle(principales, idioma)
+    labelTextoDetalle.configure(text=texto_detalle)
+    labelTextoDetalle.grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
+    # ====== (1) RESUMEN ======
+    resumen = get_resumen(principales, tiempo_total, hora_estimada, idioma)
+    if(TRADUCCIONES[idioma]["detalles origen == destino"] != texto_detalle):
+        labelDetalleTitulo.grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
+        labelResumenTitulo.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
+        labelResumen.configure(text=resumen)
+        labelResumen.grid(row=1, column=0, padx=25, pady=(0, 15), sticky="w")
 
-    pasos = []
-
-    # Buscar la primera línea NO None en el camino
-    primera_linea = None
-    for _, linea in camino_vertices:
-        if linea is not None:
-            primera_linea = linea
-            break
-
-    if primera_linea is None:
-        # Ruta rara, sin líneas asociadas
-        texto_detalle = "No hay información de líneas para este recorrido."
-    else:
-        # Primer tramo
-        pasos.append(f"• Toma la línea {primera_linea.numero} en {origen_est.nombre}.")
-
-        # Transbordos (usamos estaciones_principales)
-        for i in range(1, len(principales) - 1):
-            (est_a, linea_a) = principales[i] # Estación donde se transborda
-            (est_b, linea_b) = principales[i + 1] # Estación destino del tramo siguiente
-
-            # línea_a podría ser None en algún caso raro; lo ignoramos
-            assert linea_a != None
-
-            if est_a != est_b:
-                # Sigue en la linea
-                pasos.append(f"• Sigue en la línea {linea_a.numero} hasta {est_b.nombre}")
-            elif linea_b == None:
-                # Llegada
-                pasos.append(f"• Llega a tu destino: {destino_est.nombre}.")
-            elif linea_a != linea_b:
-                # Transbordo
-                pasos.append(f"• Haz transbordo de la línea {linea_a.numero} a la línea {linea_b.numero} en {est_a.nombre}")
-
-        texto_detalle = "\n".join(pasos)
-
-    customtkinter.CTkLabel(
-        card,
-        text=texto_detalle,
-        font=fuente_resultado,
-        anchor="w",
-        justify="left",
-        wraplength=600
-    ).grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
 
 
 def character_limit_hour(entry_text):
@@ -307,6 +242,7 @@ fuente_titulo = customtkinter.CTkFont(family="Roboto", size= 40, weight="bold")
 
 # Fuente específica para el texto de resultados (un poco más compacta)
 fuente_resultado = customtkinter.CTkFont(family="Roboto", size=14, weight="normal")
+fuente_resultado_titulo = customtkinter.CTkFont(family="Roboto", size=16, weight="bold")
 
 # Lista de nombres de estaciones ordenada alfabéticamente para los combobox
 estaciones_names = [e.nombre for e in ESTACIONES]
@@ -330,9 +266,10 @@ boton_inicio.grid(row=0, column=0, padx=10, pady=(10,20))
 ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_light.png")).resize((25, 25)), 
                                         dark_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Ajustes_dark.png")).resize((25, 25)), size=(25, 25)) # Botón ajustes
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
-                                             command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
-                                                                                            labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                                            canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
+                                             command= lambda : abrir_ajustes(ventana=ventana, fuentes=fuentesList, 
+                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
+                                                                      mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y], 
+                                                                      tiempo_total=tiempo_total, hora_estimada=hora_estimada, principales=principales))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
 
 about_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_light.png")).resize((25, 25)), 
@@ -353,8 +290,8 @@ frameAbout = customtkinter.CTkFrame(ventana, fg_color="transparent")
 botonVolverAbout = customtkinter.CTkButton(frameAbout, text= "Volver", font= fuente_base, command=lambda : cambio_ventana("inicio"))
 botonVolverAbout.grid(row=1,column=0)
 
-label_nombres = customtkinter.CTkLabel(frameAbout, font=fuente_base, text="Programa creado por:\n\nPablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
-label_nombres.grid(row=0, column=0, padx=10, pady=10, sticky="sw")
+label_acercaDe = customtkinter.CTkLabel(frameAbout, font=fuente_base, text="Programa creado por:\n\nPablo Regidor Mendez\nDaniel Ramon Gragera\nYurong Cheng\nYun Chen\nAlvaro Vicente Bonilla\nJia Jie Ye")
+label_acercaDe.grid(row=0, column=0, padx=10, pady=10, sticky="sw")
 
 # -----------------------------
 # Frame Titulo (barra superior)
@@ -371,9 +308,10 @@ labelTitulo.grid(row=0,column=1)
 
 # Botón ajustes en la barra superior (se muestra solo en modo "programa")
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
-                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
-                                                                        labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                        canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
+                                       command=lambda : abrir_ajustes(ventana=ventana, fuentes=fuentesList, 
+                                                                      labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen], canvas=mapa_canvas, 
+                                                                      mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y], 
+                                                                      tiempo_total=tiempo_total, hora_estimada=hora_estimada, principales=principales))
 
 # Botón volver en la barra superior (se muestra solo en modo "programa")
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
@@ -474,6 +412,15 @@ frameResultado.grid_rowconfigure(1, weight=1)
 etiqResultado = customtkinter.CTkLabel(frameResultado, text="Ruta óptima", font=fuente_subtitulo)
 etiqResultado.grid(row=0, column=0, pady = (20,0))
 
+    # ----- TARJETA -----
+card = customtkinter.CTkFrame(frameResultado, fg_color=("gray90", "gray20"), corner_radius=10)
+card.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+card.grid_columnconfigure(0, weight=1)
+label1 = customtkinter.CTkLabel(card, text="No existe ruta entre las estaciones seleccionadas.", font=fuente_base, anchor="w")
+labelResumenTitulo = customtkinter.CTkLabel(card, text="Resumen del trayecto", font=fuente_resultado_titulo, anchor="w")
+labelResumen = customtkinter.CTkLabel(card, text="1", font=fuente_resultado, anchor="w", justify="left")
+labelDetalleTitulo = customtkinter.CTkLabel(card, text="Detalle del recorrido", font=fuente_resultado_titulo, anchor="w")
+labelTextoDetalle = customtkinter.CTkLabel(card, text="2", font=fuente_resultado, anchor="w", justify="left", wraplength=600)
 # -----------------------------
 # Frame principal derecho (mapa)
 # -----------------------------
@@ -488,5 +435,8 @@ imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.g
 mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(), width=imagen_mapa_tk.width(), highlightthickness=0, background=color_canvas)
 mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 mapa_canvas.grid(row=0, column=0, sticky="nsew")
+
+# labelsList=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma, label_acercaDe, label1, labelResumenTitulo, labelDetalleTitulo, labelTextoDetalle, labelResumen]
+fuentesList=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado, fuente_resultado_titulo]
 
 ventana.mainloop()

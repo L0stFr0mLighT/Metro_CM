@@ -19,7 +19,7 @@ TRADUCCIONES = {
         "noExisteRuta": "No existe ruta entre las estaciones seleccionadas.",
         "resumenTitulo":"Resumen del trayecto",
         "detallesTitulo":"Detalle del recorrido",
-        "detalles origen == destino":"Estas llendo a la misma estación.",
+        "detalles origen == destino":"Estas yendo a la misma estación.",
         "resumen":"Origen: {0}\nDestino: {1}\nDuración total: {2} h, {3} min\nLlegada estimada: {4}:{5}",
         "detallesPrimerTramo": "• Toma la línea {0} en {1}.",
         "detallesSigue":"• Sigue en la línea {0} hasta {1}",

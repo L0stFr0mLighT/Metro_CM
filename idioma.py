@@ -21,7 +21,7 @@ TRADUCCIONES = {
         "resumenTitulo":"Resumen del trayecto",
         "detallesTitulo":"Detalle del recorrido",
         "detalles origen == destino":"Estas llendo a la misma estación.",
-        "resumen":"Origen:  {0}\nDestino: {1}\nDuración total: {2} h, {3} min\nLlegada estimada: {4}:{5}",
+        "resumen":"Origen: {0}\nDestino: {1}\nDuración total: {2} h, {3} min\nLlegada estimada: {4}:{5}",
         "detallesPrimerTramo": "• Toma la línea {0} en {1}.",
         "detallesSigue":"• Sigue en la línea {0} hasta {1}",
         "detallesLlegada":"• Llega a tu destino: {0}.",
@@ -49,11 +49,11 @@ TRADUCCIONES = {
         "resumenTitulo":"Summary of the route",
         "detallesTitulo":"Details of the route",
         "detalles origen == destino":"You are in the same station.",
-        "resumen":"Beginning:  {}\nDestination: {}\nTotal time: {} h, {} min\nTime of arrival: {}:{}",
-        "detallesPrimerTramo": "• Take the line {} on {}.",
-        "detallesSigue":"• Continue on line {} until {}",
-        "detallesLlegada":"• Reach your destination: {}.",
-        "detallesTransbordo": "• Change lines from {} to {} on {}",
+        "resumen":"Beginning:  {0}\nDestination: {1}\nTotal time: {2} h, {3} min\nTime of arrival: {4}:{5}",
+        "detallesPrimerTramo": "• Take the line {0} on {1}.",
+        "detallesSigue":"• Continue on line {0} until {1}",
+        "detallesLlegada":"• Reach your destination: {0}.",
+        "detallesTransbordo": "• Change lines from {0} to {1} on {2}",
         "formatoLetra": "Font format:",
         "idioma": "Language:",
     },
@@ -101,17 +101,14 @@ def get_resumen(principales: list[tuple[Estacion, Linea | None]], tiempo_total, 
 
 def get_texto_detalle(principales: list[tuple[Estacion, Linea | None]], idioma : str) -> str:
     pasos = []
-    
+
     if len(principales) == 0:
-        return ""
-    origen_est = principales[0][0]
-    destino_est = principales[-1][0]
-    texto_detalle = ""
-    # Buscar la primera línea NO None en el camino
-    if(len(principales) < 2):    
         texto_detalle = TRADUCCIONES[idioma]["detalles origen == destino"]
         return texto_detalle
     else:
+        origen_est = principales[0][0]
+        destino_est = principales[-1][0]
+        texto_detalle = ""
         # Primer tramo
         text = TRADUCCIONES[idioma]["detallesPrimerTramo"]
         pasos.append(text.format(principales[1][1].numero, origen_est.nombre))

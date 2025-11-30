@@ -1,4 +1,7 @@
 import customtkinter
+from motor.mapa import Mapa
+from PIL import ImageTk
+
 
 # Diccionario con todos los textos de la interfaz según el idioma seleccionado.
 # Cada clave principal es un idioma, y dentro hay las traducciones de cada etiqueta.
@@ -63,7 +66,7 @@ IDIOMAS = ["Español", "Inglés", "Francés"]
 idioma = "Español"
 
 def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel],
-                  canvas: customtkinter.CTkCanvas):
+                  canvas: customtkinter.CTkCanvas, mapa: Mapa, RES: tuple[int, int]):
     """
     Crea y muestra una ventana de ajustes sobre la ventana principal,
     desde la que se puede cambiar tema, idioma y tipografía.
@@ -103,7 +106,7 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     # Icono según modo actual
     texto = "🌙" if modo else "☀️"
     # Crea el switch de modo oscuro/claro
-    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro, canvas), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
+    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro, canvas, mapa, RES), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
     modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
     
     # --- Label de formato de letra ---
@@ -143,16 +146,22 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value, fuentes))
     selecc_tamaño.grid(row=5, column=0, padx=2, pady=(0,10), sticky="ew")
     
-def cambio_switch(switch, canvas: customtkinter.CTkCanvas):
+def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCanvas, mapa : Mapa, RES: tuple[int, int]):
     """
     Alterna entre modo claro y oscuro y actualiza el icono del switch.
     """
     if (switch.get() == 0):
-        canvas.configure(background="gray92")
+        imagen_mapa_tk = mapa.dibujar_estaciones(RES[0], RES[1], False)
+        canvas.delete("all")
+        canvas.configure(background="grey92")
+        canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
         customtkinter.set_appearance_mode("Light")
         switch.configure(text="☀️")
     else:
-        canvas.configure(background="gray14")
+        imagen_mapa_tk = mapa.dibujar_estaciones(RES[0], RES[1], True)
+        canvas.delete("all")
+        canvas.configure(background="grey14")
+        canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
         customtkinter.set_appearance_mode("Dark") 
         switch.configure(text="🌙")
 

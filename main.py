@@ -24,10 +24,7 @@ def buscar_rutas():
     Llama al motor de rutas (A*), calcula el tiempo estimado del trayecto
     y lanza la animación del recorrido en el mapa.
     """
-    global step, camino_animar, tiempo_inicio, id_linea
-
-
-    mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
+    global step, camino_animar, tiempo_inicio, id_linea, imagen_mapa_tk, estaciones_names
 
     origen_text = origen.get()
     destino_text = destino.get()
@@ -37,10 +34,10 @@ def buscar_rutas():
     min_salida = entry_min.get()
 
     # Si falta origen o destino, no hacemos nada
-    if not origen_text or not destino_text:
+    if origen_text not in estaciones_names or destino_text not in estaciones_names:
         mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
         return
-
+    
     # Calcula el tiempo total del camino en minutos con A*
     camino = grafo.calcular_camino_minimo(origen_text, destino_text, bool(menos_trasbordos))
     if camino is None:
@@ -48,6 +45,7 @@ def buscar_rutas():
         mostrar_resultado([], 0, (hora_salida, min_salida), hay_camino=False)
         return 
     # TODO: Mostrar el camino
+    
     # Calcula el tiempo total del camino en minutos
     tiempo_camino = round(grafo.calcular_tiempo_camino(camino))
     
@@ -62,6 +60,7 @@ def buscar_rutas():
     camino_dedup = list(dict.fromkeys(map(lambda x : x[0], camino)))
 
     # Limpia el canvas y vuelve a dibujar el mapa base de fondo
+    imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
     mapa_canvas.delete("all")
     mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 
@@ -339,7 +338,7 @@ ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.di
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
                                              command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
                                                                                             labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                                            canvas=mapa_canvas))
+                                                                                            canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
 
 about_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_light.png")).resize((25, 25)), 
@@ -380,7 +379,7 @@ labelTitulo.grid(row=0,column=1)
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
                                        command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo],
                                                                         labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                        canvas=mapa_canvas))
+                                                                        canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
 
 # Botón volver en la barra superior (se muestra solo en modo "programa")
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 
@@ -493,10 +492,10 @@ frameMapa.grid_columnconfigure(0, weight=1)
 frameMapa.grid_rowconfigure(0, weight=1)
 # frameMapa.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-mapa_dibujo = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y)
-imagen_mapa_tk = ImageTk.PhotoImage(mapa_dibujo)
+color_canvas = "grey14" if customtkinter.get_appearance_mode() == "Dark" else "grey92"
+
+imagen_mapa_tk = mapa.dibujar_estaciones(RES_MAPA_X, RES_MAPA_Y, customtkinter.get_appearance_mode() == "Dark")
 # TODO: El color de fondo depende del modo de la apariencia
-color_canvas = "gray14" if customtkinter.get_appearance_mode() == "Dark" else "gray92"
 mapa_canvas = customtkinter.CTkCanvas(frameMapa, height=imagen_mapa_tk.height(), width=imagen_mapa_tk.width(), highlightthickness=0, background=color_canvas)
 mapa_canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
 mapa_canvas.grid(row=0, column=0, sticky="nsew")

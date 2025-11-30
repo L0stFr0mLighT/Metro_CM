@@ -3,7 +3,7 @@ from common.estacion import Estacion, Linea, Conexion, Transbordo
 from motor import roundRect
 from dataclasses import dataclass, field
 from cairo import Context, ImageSurface, FORMAT_ARGB32
-from PIL import Image
+from PIL import Image, ImageTk
 import math
 import cairo
 from customtkinter import CTkCanvas
@@ -42,6 +42,7 @@ class Mapa:
     # Atributos internos para el dibujo
     _mapa_actual: ImageSurface | None = field(default_factory=lambda : None)
     _ctx: Context | None = field(default_factory=lambda : None)
+    _mapaTk: ImageTk.PhotoImage | None = field(default_factory=lambda : None)
     _id_curva_recorrido: int | None = field(default_factory=lambda : None)
     _curva_recorrido: list[int] = field(default_factory=list)
     _primer_render: bool = field(default_factory=lambda : False)
@@ -118,7 +119,7 @@ class Mapa:
             return v1
         return v2
 
-    def _dibujar_mapa_inicial(self, res_x: int, res_y: int):
+    def _dibujar_mapa_inicial(self, res_x: int, res_y: int, modo: bool):
         """
         Pinta el mapa inicial, inicializando la superficie de imagen
         """
@@ -191,22 +192,28 @@ class Mapa:
 
             # Dibuja el nombre de la estación
             label = estacion.nombre
+            
             self._ctx.set_source_rgba(estacion.color[0]/255,estacion.color[1]/255, estacion.color[2]/255)   # Color
+            if estacion.color == (0,0,0) and modo:
+                self._ctx.set_source_rgba(1,1,1)
             self._ctx.set_font_size(0.02)        # Tamaño
             self._ctx.move_to(estacion.pos_nombre[0], estacion.pos_nombre[1]) # Posición
             self._ctx.show_text(label)      # Dibuja el texto
+        self._mapaTk =ImageTk.PhotoImage(to_pil(self._mapa_actual))
 
-    def dibujar_estaciones(self, res_x: int, res_y: int) -> Image.Image:
+    def dibujar_estaciones(self, res_x: int, res_y: int, modo: bool) -> ImageTk.PhotoImage:
         """
         Dibuja el mapa desde cero
         """
         self._mapa_actual = None
         self._ctx = None
+        self._mapaTk = None
         self._id_curva_recorrido = None
         self._curva_recorrido = list()
-        self._dibujar_mapa_inicial(res_x, res_y)
+        self._dibujar_mapa_inicial(res_x, res_y, modo)
         assert self._mapa_actual != None
-        return to_pil(self._mapa_actual)
+        assert self._mapaTk != None
+        return self._mapaTk
     
     def dibujar_estaciones_con_recorrido(self, res_x: int, res_y: int, recorrido: list[Estacion], 
                                          step: float, canvas: CTkCanvas | None) -> bool:

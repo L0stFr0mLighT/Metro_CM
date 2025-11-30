@@ -43,7 +43,7 @@ class Mapa:
     _mapa_actual: ImageSurface | None = field(default_factory=lambda : None)
     _ctx: Context | None = field(default_factory=lambda : None)
     _id_curva_recorrido: int | None = field(default_factory=lambda : None)
-    _curva_recorrido: list[tuple[int, int]] = field(default_factory=list)
+    _curva_recorrido: list[int] = field(default_factory=list)
     _primer_render: bool = field(default_factory=lambda : False)
 
     def set_mapa(self, estaciones: list[Estacion], lineas: list[Linea], conexiones: list[Conexion], transbordos: list[Transbordo]):
@@ -230,7 +230,6 @@ class Mapa:
         assert self._mapa_actual != None
 
         if canvas == None:
-            self._mapa_actual.write_to_png("prueba.png")
             return False
         
         # Por cada estacion del recorrido, vamos dibujandolo
@@ -240,8 +239,7 @@ class Mapa:
             v2 = par_estaciones[1].pos_mapa
             
             if step == 0: 
-                #
-                self._curva_recorrido = [escalar(res_x, res_y, v1[0], v1[1])]
+                self._curva_recorrido = [*escalar(res_x, res_y, v1[0], v1[1])]
                 self._primer_render = True
                 break
 
@@ -260,11 +258,13 @@ class Mapa:
                 pos_final_pintado = (v1[0] + director_pintado[0], v1[1] + director_pintado[1])
                 
                 # Pintamos la parte proporcional
-                self._curva_recorrido.append(escalar(res_x, res_y, pos_final_pintado[0], pos_final_pintado[1]))
+                (coord_x, coord_y) = escalar(res_x, res_y, pos_final_pintado[0], pos_final_pintado[1])
+                self._curva_recorrido.extend([coord_x, coord_y])
 
             if step > len(recorrido) - 1:
                 # El paso es demasiado grande, pintamos hasta el final
-                self._curva_recorrido.append(escalar(res_x, res_y, recorrido[-1].pos_mapa[0], recorrido[-1].pos_mapa[1]))
+                (coord_x, coord_y) = escalar(res_x, res_y, recorrido[-1].pos_mapa[0], recorrido[-1].pos_mapa[1])
+                self._curva_recorrido.extend([coord_x, coord_y])
 
             if self._primer_render:
                 self._id_curva_recorrido = canvas.create_line(*self._curva_recorrido, 

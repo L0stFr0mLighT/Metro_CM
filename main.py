@@ -176,21 +176,22 @@ def mostrar_resultado(camino_vertices, tiempo_total, hora_estimada, hay_camino=T
         pasos.append(f"• Toma la línea {primera_linea.numero} en {origen_est.nombre}.")
 
         # Transbordos (usamos estaciones_principales)
-        for i in range(0, len(principales) - 1, 2):
-            est_a, linea_a = principales[i] # Estación donde se transborda
-            est_b, linea_b = principales[i + 1] # Estación destino del tramo siguiente
+        for i in range(1, len(principales) - 1):
+            (est_a, linea_a) = principales[i] # Estación donde se transborda
+            (est_b, linea_b) = principales[i + 1] # Estación destino del tramo siguiente
 
-            # línea_b podría ser None en algún caso raro; lo ignoramos
-            if linea_b is None:
-                continue
+            # línea_a podría ser None en algún caso raro; lo ignoramos
+            assert linea_a != None
 
-            pasos.append(
-                f"• En {est_a.nombre}, haz transbordo a la línea {linea_b.numero} "
-                f"y sigue hasta {est_b.nombre}."
-            )
-
-        # Llegada
-        pasos.append(f"• Llega a tu destino: {destino_est.nombre}.")
+            if est_a != est_b:
+                # Sigue en la linea
+                pasos.append(f"• Sigue en la línea {linea_a.numero} hasta {est_b.nombre}")
+            elif linea_b == None:
+                # Llegada
+                pasos.append(f"• Llega a tu destino: {destino_est.nombre}.")
+            elif linea_a != linea_b:
+                # Transbordo
+                pasos.append(f"• Haz transbordo de la línea {linea_a.numero} a la línea {linea_b.numero} en {est_a.nombre}")
 
         texto_detalle = "\n".join(pasos)
 

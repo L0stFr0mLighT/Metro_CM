@@ -9,6 +9,7 @@ import cairo
 from customtkinter import CTkCanvas
 
 FACTOR_ESCALA = 1.25
+COLOR_REC = "red"
 
 def to_pil(surface: ImageSurface) -> Image.Image:
     """
@@ -203,13 +204,12 @@ class Mapa:
 
     def dibujar_estaciones(self, res_x: int, res_y: int, modo: bool) -> ImageTk.PhotoImage:
         """
-        Dibuja el mapa desde cero
+        Dibuja el mapa desde cero, coonservando el recorrido actual
         """
         self._mapa_actual = None
         self._ctx = None
         self._mapaTk = None
         self._id_curva_recorrido = None
-        self._curva_recorrido = list()
         self._dibujar_mapa_inicial(res_x, res_y, modo)
         assert self._mapa_actual != None
         assert self._mapaTk != None
@@ -219,6 +219,10 @@ class Mapa:
                                          step: float, canvas: CTkCanvas | None) -> bool:
         """
         Dibuja en el canvas el recorrido del tren hasta el punto indicado por 'step'.
+
+        Si 'step' es 0, inicializa el recorrido actual con las coordenadas de la primera estación.
+
+        Si el recorrido tiene menos de dos estaciones, borra el camino actual sin dibujar nada. 
 
         Si el mapa aún no ha sido dibujado previamente, lo crea primero.
 
@@ -230,9 +234,14 @@ class Mapa:
                     más pasos de animación.
             - False → si el recorrido ya está completado.
         """
-        COLOR_REC = "red"
+        if len(recorrido) < 2:
+            self._curva_recorrido = list()
+            self._id_curva_recorrido = None
+            self._primer_render = False
+            return False
+
         if self._mapa_actual == None:
-            self._dibujar_mapa_inicial(res_x, res_y)
+            self._dibujar_mapa_inicial(res_x, res_y, True)
 
         assert self._mapa_actual != None
 
@@ -273,7 +282,7 @@ class Mapa:
                 (coord_x, coord_y) = escalar(res_x, res_y, recorrido[-1].pos_mapa[0], recorrido[-1].pos_mapa[1])
                 self._curva_recorrido.extend([coord_x, coord_y])
 
-            if self._primer_render:
+            if self._primer_render or self._id_curva_recorrido == None:
                 self._id_curva_recorrido = canvas.create_line(*self._curva_recorrido, 
                                                               width=0.01 * FACTOR_ESCALA * res_x,
                                                               fill=COLOR_REC)
@@ -288,10 +297,11 @@ class Mapa:
             crear_circulo(*escalar(res_x, res_y, v1[0], v1[1]), int(0.004 * FACTOR_ESCALA * res_x),
                           canvas, fill="white")
 
-            #Evito que el tren avance más allá del paso actual
+            # Evito que el tren avance más allá del paso actual
             if i < step and step <= i + 1:
                 break
             pass # for i in range(len(recorrido) - 1)
+        
         # Si estamos en el paso final, dibujamos el punto del tren encima de la estacion
         if len(recorrido) > 0 and step >= len(recorrido) - 1:
             crear_circulo(*escalar(res_x, res_y, recorrido[-1].pos_mapa[0], recorrido[-1].pos_mapa[1]), 
@@ -300,6 +310,26 @@ class Mapa:
         # Falta recorrido por pintar si step < len(recorrido) - 1
         return step < (len(recorrido) - 1)
     
+    def recuperar_recorrido(self, res_x: int, res_y: int, canvas: CTkCanvas, camino_animar: list[Estacion]):
+        """
+        Recupera el recorrido anterior al canvas. Se puede llamar tras redibujar el mapa
+        """
+        if len(self._curva_recorrido) < 2 or len(camino_animar) < 2:
+            return
+        
+        self._id_curva_recorrido = canvas.create_line(*self._curva_recorrido,
+                                                      width=0.01 * FACTOR_ESCALA * res_x, 
+                                                      fill=COLOR_REC)
+        for i in range(len(camino_animar) - 1):            
+            # Se dibujan los puntos encima de las estaciones
+            crear_circulo(*escalar(res_x, res_y, camino_animar[i].pos_mapa[0], camino_animar[i].pos_mapa[1]), 
+                          int(0.005 * FACTOR_ESCALA * res_x), canvas=canvas, fill="black")
+            crear_circulo(*escalar(res_x, res_y, camino_animar[i].pos_mapa[0], camino_animar[i].pos_mapa[1]), 
+                          int(0.004 * FACTOR_ESCALA * res_x), canvas=canvas, fill="white")
+        # Para el ultimo, dibujamos el punto verde
+        crear_circulo(*escalar(res_x, res_y, camino_animar[-1].pos_mapa[0], camino_animar[-1].pos_mapa[1]), 
+                      int(0.005 * FACTOR_ESCALA * res_x), canvas, fill="green")
+
 def crear_circulo(x: int, y: int, r: int, canvas: CTkCanvas, **kwargs):
     """
     Crea un circulo en el canvas dado.

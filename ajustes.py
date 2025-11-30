@@ -1,6 +1,7 @@
 import customtkinter
 from motor.mapa import Mapa
 from PIL import ImageTk
+from common.estacion import Estacion
 
 
 # Diccionario con todos los textos de la interfaz según el idioma seleccionado.
@@ -66,7 +67,7 @@ IDIOMAS = ["Español", "Inglés", "Francés"]
 idioma = "Español"
 
 def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFont], labels : list[customtkinter.CTkLabel],
-                  canvas: customtkinter.CTkCanvas, mapa: Mapa, RES: tuple[int, int]):
+                  canvas: customtkinter.CTkCanvas, mapa: Mapa, camino_anim: list[Estacion], RES: tuple[int, int]):
     """
     Crea y muestra una ventana de ajustes sobre la ventana principal,
     desde la que se puede cambiar tema, idioma y tipografía.
@@ -106,7 +107,7 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     # Icono según modo actual
     texto = "🌙" if modo else "☀️"
     # Crea el switch de modo oscuro/claro
-    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro, canvas, mapa, RES), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
+    modoOscuro = customtkinter.CTkSwitch(tab_actual, command=lambda: cambio_switch(modoOscuro, canvas, mapa, camino_anim, RES), variable=switch_var, text=texto, switch_width=60, switch_height=30, font=fuentes[0])
     modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
     
     # --- Label de formato de letra ---
@@ -146,7 +147,8 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     selecc_tamaño.configure(command=lambda value: cambio_tamaño_tipografia(value, fuentes))
     selecc_tamaño.grid(row=5, column=0, padx=2, pady=(0,10), sticky="ew")
     
-def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCanvas, mapa : Mapa, RES: tuple[int, int]):
+def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCanvas, mapa : Mapa, 
+                  camino_animacion: list[Estacion], RES: tuple[int, int]):
     """
     Alterna entre modo claro y oscuro y actualiza el icono del switch.
     """
@@ -155,6 +157,7 @@ def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCan
         canvas.delete("all")
         canvas.configure(background="grey92")
         canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
+        mapa.recuperar_recorrido(RES[0], RES[1], canvas, camino_animacion)
         customtkinter.set_appearance_mode("Light")
         switch.configure(text="☀️")
     else:
@@ -162,6 +165,7 @@ def cambio_switch(switch : customtkinter.CTkSwitch, canvas: customtkinter.CTkCan
         canvas.delete("all")
         canvas.configure(background="grey14")
         canvas.create_image(0, 0, image=imagen_mapa_tk, anchor="nw")
+        mapa.recuperar_recorrido(RES[0], RES[1], canvas, camino_animacion)
         customtkinter.set_appearance_mode("Dark") 
         switch.configure(text="🌙")
 

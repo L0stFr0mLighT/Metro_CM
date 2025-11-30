@@ -332,7 +332,7 @@ ajustes_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.di
 botonAjustesInicio = customtkinter.CTkButton(frame_inicio, image=ajustes_imagen, text="Ajustes", width=300, font= fuente_base, 
                                              command= lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
                                                                                             labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                                            canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
+                                                                                            canvas=mapa_canvas, mapa=mapa, camino_anim=camino_animar, RES=(RES_MAPA_X, RES_MAPA_Y)))
 botonAjustesInicio.grid(row=1, column=0, padx=10, pady=10)
 
 about_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/About_light.png")).resize((25, 25)), 
@@ -373,7 +373,7 @@ labelTitulo.grid(row=0,column=1)
 botonAjustesTitulo = customtkinter.CTkButton(frameTitulo, image=ajustes_imagen, text="", width=30, height=30, corner_radius=10, 
                                        command=lambda : abrir_ajustes(ventana=ventana, fuentes=[fuente_base, fuente_subtitulo, fuente_titulo, fuente_resultado],
                                                                         labels=[etiqOrigen, etiqDestino, etiqSalida, etiqPreferencias, opcion1, opcion2, etiqResultado, boton_inicio, botonAjustesInicio, botonAbout, botonCerrarPrograma],
-                                                                        canvas=mapa_canvas, mapa=mapa, RES=[RES_MAPA_X, RES_MAPA_Y]))
+                                                                        canvas=mapa_canvas, mapa=mapa, camino_anim=camino_animar, RES=(RES_MAPA_X, RES_MAPA_Y)))
 
 # Botón volver en la barra superior (se muestra solo en modo "programa")
 volver_imagen = customtkinter.CTkImage(light_image=Image.open(path.join(path.dirname(__file__), "Imagenes/Volver_light.png")).resize((25, 25)), 

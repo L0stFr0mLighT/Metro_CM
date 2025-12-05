@@ -130,3 +130,15 @@ def get_texto_detalle(principales: list[tuple[Estacion, Linea | None]], idioma :
                 pasos.append(text.format(linea_a.numero, linea_b.numero, est_a.nombre))
     texto_detalle = "\n".join(pasos)
     return texto_detalle
+
+def get_formatoLabel (idioma: str) -> str:
+    """
+    Devuelve el formato de etiqueta para los labels de la interfaz según el idioma.
+    """
+    return TRADUCCIONES[idioma]["formatoLetra"]
+
+def get_labelIdioma (idioma: str) -> str:
+    """
+    Devuelve el texto para la etiqueta de idioma según el idioma.
+    """
+    return TRADUCCIONES[idioma]["idioma"]

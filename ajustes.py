@@ -1,7 +1,7 @@
 import customtkinter
 from motor.mapa import Mapa
 from PIL import ImageTk
-from idioma import TRADUCCIONES, IDIOMAS, get_resumen, get_texto_detalle
+from idioma import TRADUCCIONES, IDIOMAS, get_resumen, get_texto_detalle, get_formatoLabel, get_labelIdioma
 from common.estacion import Estacion, Linea
 
 # Diccionario con todos los textos de la interfaz según el idioma seleccionado.
@@ -54,12 +54,14 @@ def abrir_ajustes(ventana: customtkinter.CTk, fuentes : list[customtkinter.CTkFo
     modoOscuro.grid(row=0, column=0, padx=(0,30), pady=10, sticky="nse")
     
     # --- Label de formato de letra ---
-    labelFormato = customtkinter.CTkLabel(tab_actual, text="Formato de letra:", font=fuentes[0])
+    labeltext = get_formatoLabel(idioma)    
+    labelFormato = customtkinter.CTkLabel(tab_actual, text=labeltext, font=fuentes[0])
     labels.append(labelFormato)  # Se añade a la lista para actualizarse al cambiar idioma
     labelFormato.grid(row=3, column=0, padx=2, pady=1, sticky="w")
     
     # --- Label de idioma ---
-    labelIdioma = customtkinter.CTkLabel(tab_actual, text="Idioma:", font=fuentes[0])
+    labeltext = get_labelIdioma(idioma)   
+    labelIdioma = customtkinter.CTkLabel(tab_actual, text=labeltext, font=fuentes[0])
     labels.append(labelIdioma)
     labelIdioma.grid(row=1, column=0, padx=2, pady=1, sticky="w")
     
@@ -145,9 +147,10 @@ def cambio_idioma(ajustes : customtkinter.CTkToplevel , tabs : customtkinter.CTk
                 x = TRADUCCIONES[idioma][key]
                 labels[i].configure(text=TRADUCCIONES[idioma][key])
                 i += 1
-    labels[-1].configure(text=TRADUCCIONES[idioma]["idioma"])
-    labels[-2].configure(text=TRADUCCIONES[idioma]["formatoLetra"])
-    
+    texto = get_labelIdioma(idioma)
+    labels[-1].configure(text=texto)
+    texto = get_formatoLabel(idioma)
+    labels[-2].configure(text=texto)
     text= get_resumen(principales=principales, tiempo_total=tiempo_total, hora_estimada=hora_estimada, idioma=idioma)         
     labels[-3].configure(text=text)
     text= get_texto_detalle(principales=principales, idioma=idioma)         

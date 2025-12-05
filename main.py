@@ -57,7 +57,7 @@ def buscar_rutas():
         diff_hora = 5-int(hora_salida)-1
         diff_min = diff_hora*60 + 60-int(min_salida)
         tiempo_total = sumar_minutos("00", str(minutos_camino), diff_min)
-    hora_estimada = sumar_minutos(hora_salida, min_salida, minutos_camino)
+    hora_estimada = sumar_minutos(hora_salida, min_salida, int(tiempo_total[0])*60 + int(tiempo_total[1]))
     # camino: lista de (Estacion, Linea|None)  -> lo usamos para describir la ruta
     mostrar_resultado(camino,hay_camino=True)
     

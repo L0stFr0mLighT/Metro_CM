@@ -105,11 +105,11 @@ def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], hay_ca
     global label1, labelResumenTitulo, labelDetalleTitulo, labelResumen, card, tiempo_total, hora_estimada, principales, idioma
     # ----- LIMPIAR CONTENIDO -----
     for widget in card.grid_slaves():
-        if widget.grid_info().get("row", 0) != 0: # Mantener el título
-            widget.grid_forget()
+        widget.grid_forget()
 
     # Caso sin ruta
     if not hay_camino or not camino_vertices:
+        label1.configure(text=TRADUCCIONES[get_idioma()]["noExisteRuta"])
         label1.grid(row=0, column=0, padx=20, pady=20, sticky="w")
         return
 
@@ -121,15 +121,17 @@ def mostrar_resultado(camino_vertices: list[tuple[Estacion, Linea|None]], hay_ca
     # ------ RESUMEN Y DETALLES -----
     texto_detalle = get_texto_detalle(principales, idioma)
     labelTextoDetalle.configure(text=texto_detalle)
-    labelTextoDetalle.grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
     
     resumen = get_resumen(principales, tiempo_total, hora_estimada, idioma)
     if(TRADUCCIONES[idioma]["detalles origen == destino"] != texto_detalle):
+        labelTextoDetalle.grid(row=3, column=0, padx=25, pady=(0, 15), sticky="w")
         labelDetalleTitulo.grid(row=2, column=0, padx=15, pady=(5, 5), sticky="w")
         labelResumenTitulo.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
         labelResumen.configure(text=resumen)
         labelResumen.grid(row=1, column=0, padx=25, pady=(0, 15), sticky="w")
-
+    else:
+        label1.configure(text=texto_detalle)
+        label1.grid(row=0, column=0, padx=20, pady=20, sticky="w")
 
 
 def character_limit_hour(entry_text):
@@ -409,11 +411,12 @@ etiqResultado.grid(row=0, column=0, pady = (20,0))
 card = customtkinter.CTkFrame(frameResultado, fg_color=("gray90", "gray20"), corner_radius=10)
 card.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 card.grid_columnconfigure(0, weight=1)
-label1 = customtkinter.CTkLabel(card, text="No existe ruta entre las estaciones seleccionadas.", font=fuente_base, anchor="w")
+label1 = customtkinter.CTkLabel(card, text="No existe ruta entre las estaciones seleccionadas.", font=fuente_resultado, anchor="w")
 labelResumenTitulo = customtkinter.CTkLabel(card, text="Resumen del trayecto", font=fuente_resultado_titulo, anchor="w")
-labelResumen = customtkinter.CTkLabel(card, text="1", font=fuente_resultado, anchor="w", justify="left")
+labelResumen = customtkinter.CTkLabel(card, text="", font=fuente_resultado, anchor="w", justify="left")
 labelDetalleTitulo = customtkinter.CTkLabel(card, text="Detalle del recorrido", font=fuente_resultado_titulo, anchor="w")
-labelTextoDetalle = customtkinter.CTkLabel(card, text="2", font=fuente_resultado, anchor="w", justify="left", wraplength=600)
+labelTextoDetalle = customtkinter.CTkLabel(card, text="", font=fuente_resultado, anchor="w", justify="left")
+
 # -----------------------------
 # Frame principal derecho (mapa)
 # -----------------------------

@@ -1,5 +1,4 @@
-# trabajo-ia
-Trabajo Metro de México
+# Trabajo de Metro de Ciudad de México
 
 ### Instalación de dependencias
 Para instalar las dependencias necesarias, se usa:
